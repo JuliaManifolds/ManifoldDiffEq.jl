@@ -10,11 +10,13 @@ using LinearAlgebra
         return cross(u, [1.0, 0.0, 0.0])
     end
     prob = ODEProblem(A, [0.0, 1.0, 0.0], (0, 2.0))
+    alg = ManifoldDiffEq.ManifoldLieEuler(Sphere(2), ExponentialRetraction())
     sol1 = solve(
         prob,
-        ManifoldDiffEq.ManifoldLieEuler(Sphere(2), ExponentialRetraction()),
+        alg,
         dt = 1 / 8,
     )
+    @test alg_order(alg) == 1
 
     @test sol1(0.0) ≈ [0.0, 1.0, 0.0]
 end

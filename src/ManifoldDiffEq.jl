@@ -8,7 +8,6 @@ using OrdinaryDiffEq:
     OrdinaryDiffEqAlgorithm,
     OrdinaryDiffEqMutableCache,
     OrdinaryDiffEqConstantCache,
-    alg_order,
     trivial_limiter!,
     constvalue,
     @muladd,
@@ -16,7 +15,7 @@ using OrdinaryDiffEq:
     @cache,
     @..
 
-import OrdinaryDiffEq: alg_cache, initialize!, perform_step!
+import OrdinaryDiffEq: alg_cache, alg_order, initialize!, perform_step!
 
 
 @doc raw"""
@@ -81,6 +80,8 @@ struct ManifoldLieEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
     retraction::TR
 end
 
+alg_order(::ManifoldLieEuler) = 1
+
 """
     LieEulerCache
 
@@ -138,27 +139,6 @@ function initialize!(integrator, cache::LieEulerCache)
     return integrator.k[1] = integrator.fsalfirst
 end
 
-
-
-#########
-
-"""
-    ManifoldDiffEqOperator{T<:Number,TF} <: AbstractDiffEqOperator{T}
-
-DiffEq operator on manifolds.
-"""
-struct ManifoldDiffEqOperator{T<:Number,TF} <: SciMLBase.AbstractDiffEqOperator{T}
-    func::TF
-end
-
-ManifoldDiffEqOperator{T}(f) where {T<:Number} = ManifoldDiffEqOperator{T,typeof(f)}(f)
-
-function (L::ManifoldDiffEqOperator)(du, u, p, t)
-    return copyto!(du, L.func(u, p, t))
-end
-function (L::ManifoldDiffEqOperator)(u, p, t)
-    return L.func(u, p, t)
-end
-
+include("operators.jl")
 
 end # module
