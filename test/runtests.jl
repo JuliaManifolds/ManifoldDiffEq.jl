@@ -11,11 +11,7 @@ using LinearAlgebra
     end
     prob = ODEProblem(A, [0.0, 1.0, 0.0], (0, 2.0))
     alg = ManifoldDiffEq.ManifoldLieEuler(Sphere(2), ExponentialRetraction())
-    sol1 = solve(
-        prob,
-        alg,
-        dt = 1 / 8,
-    )
+    sol1 = solve(prob, alg, dt = 1 / 8)
     @test alg_order(alg) == 1
 
     @test sol1(0.0) ≈ [0.0, 1.0, 0.0]
