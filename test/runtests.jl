@@ -3,6 +3,7 @@ using ManifoldDiffEq
 using Manifolds
 using OrdinaryDiffEq: OrdinaryDiffEq, alg_order
 using LinearAlgebra
+using DiffEqBase
 
 @testset "ManifoldDiffEq" begin
 
