@@ -12,11 +12,11 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
     end
 
     @testset "Sphere" begin
-        A = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+        M = Sphere(2)
+        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(M) do u, p, t
             return cross(u, [1.0, 0.0, 0.0])
         end
         u0 = [0.0, 1.0, 0.0]
-        M = Sphere(2)
         alg = manifold_to_alg(M)
         prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = solve(prob, alg, dt = 1 / 8)
@@ -25,11 +25,11 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
     end
 
     @testset "Product manifold" begin
-        A = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+        M = ProductManifold(Sphere(2), Euclidean(3))
+        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(M) do u, p, t
             return ProductRepr(cross(u.parts[1], [1.0, 0.0, 0.0]), u.parts[2])
         end
         u0 = ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
-        M = ProductManifold(Sphere(2), Euclidean(3))
         alg = manifold_to_alg(M)
         prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = solve(prob, alg, dt = 1 / 8)

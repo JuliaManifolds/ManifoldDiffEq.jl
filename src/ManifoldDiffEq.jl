@@ -26,7 +26,7 @@ include("utils.jl")
 include("operators.jl")
 include("problems.jl")
 include("interpolation.jl")
-include("solvers.jl")
+include("frozen_solvers.jl")
 include("lie_solvers.jl")
 
 end # module

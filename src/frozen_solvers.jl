@@ -120,8 +120,10 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
 
     k1 = f(u, p, t)
     dt2 = dt / 2
-    k2 = f(retract(alg.manifold, u, k1 * dt2, alg.retraction), p, t + dt2)
-    retract!(alg.manifold, u, u, dt * k2, alg.retraction)
+    tmp = retract(alg.manifold, u, k1 * dt2, alg.retraction)
+    k2 = f(tmp, p, t + dt2)
+    k2t = f.f.operator_vector_transport(tmp, k2, u, p, t)
+    retract!(alg.manifold, u, u, dt * k2t, alg.retraction)
 
     return integrator.destats.nf += 2
 end

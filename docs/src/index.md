@@ -33,14 +33,32 @@ arr = Makie.arrows(
     arrowsize = 0.1, linecolor = (:gray, 0.7), linewidth = 0.02, lengthscale = 0.1
 )
 
-using ManifoldDiffEq, OrdinaryDiffEq
+using ManifoldDiffEq, OrdinaryDiffEq, Manifolds
 
-A = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+# This is the same ODE problem on two different formulations: Lie group action (prob_lie)
+# and frozen coefficients (prob_frozen)
+S2 = Manifolds.Sphere(2)
+
+A_lie = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+    return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
+end
+prob_lie = ODEProblem(A_lie, [0.0, 1.0, 0.0], (0, 20.0))
+
+A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(S2) do u, p, t
     return f2(u...)
 end
-prob = ODEProblem(A, [0.0, 1.0, 0.0], (0, 20.0))
-alg = ManifoldDiffEq.ManifoldLieEuler(Sphere(2), ExponentialRetraction())
-sol1 = solve(prob, alg, dt = 0.001)
+prob_frozen = ODEProblem(A_frozen, [0.0, 1.0, 0.0], (0, 20.0))
 
-Makie.lines!([u[1] for u in sol1.u], [u[2] for u in sol1.u], [u[3] for u in sol1.u]; linewidth = 10, color=:red)
+action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
+alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)
+
+alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
+alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
+
+sol_lie = solve(prob_lie, alg_lie_euler, dt = 0.01)
+sol_frozen = solve(prob_frozen, alg_cg2, dt = 0.01)
+
+for (sol, color) in [(sol_lie, :red), (sol_frozen, :green)]
+    Makie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 10, color=color)
+end
 ```
