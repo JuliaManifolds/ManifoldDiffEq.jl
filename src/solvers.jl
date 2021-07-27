@@ -1,119 +1,34 @@
 
-
-struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM} <:
-       OrdinaryDiffEq.OrdinaryDiffEqInterpolation{cacheType}
-    f::F
-    timeseries::uType
-    ts::tType
-    ks::kType
-    dense::Bool
-    cache::cacheType
-    manifold::TM
-end
-
-function (interp::ManifoldInterpolationData)(t, idxs, deriv, p, continuity)
-    return ode_interpolation(t, interp, idxs, deriv, p, continuity)
-end
-
-function manifold_linear_interpolation(
-    M::AbstractManifold,
-    Θ,
-    dt,
-    p,
-    q,
-    idxs::Nothing,
-    T::Type{Val{0}},
-)
-    return shortest_geodesic(M, p, q, Θ)
-end
-
-function manifold_linear_interpolation(
-    M::AbstractManifold,
-    Θ,
-    dt,
-    ps,
-    qs,
-    idxs,
-    T::Type{Val{0}},
-)
-    return map(i -> shortest_geodesic(M, ps[i], qs[i], Θ), idxs)
-end
-
-function ode_interpolation(
-    tval::Number,
-    id::ManifoldInterpolationData,
-    idxs,
-    deriv,
-    p,
-    continuity::Symbol = :left,
-)
-    # implmenented based on `ode_interpolation` from OrdinaryDiffEq.jl
-    @unpack ts, timeseries, ks, f, cache = id
-    @inbounds tdir = sign(ts[end] - ts[1])
-
-    if continuity === :left
-        # we have i₋ = i₊ = 1 if tval = ts[1], i₊ = i₋ + 1 = lastindex(ts) if tval > ts[end],
-        # and otherwise i₋ and i₊ satisfy ts[i₋] < tval ≤ ts[i₊]
-        i₊ = min(lastindex(ts), OrdinaryDiffEq._searchsortedfirst(ts, tval, 2, tdir > 0))
-        i₋ = i₊ > 1 ? i₊ - 1 : i₊
-    else
-        # we have i₋ = i₊ - 1 = 1 if tval < ts[1], i₊ = i₋ = lastindex(ts) if tval = ts[end],
-        # and otherwise i₋ and i₊ satisfy ts[i₋] ≤ tval < ts[i₊]
-        i₋ = max(1, OrdinaryDiffEq._searchsortedlast(ts, tval, 1, tdir > 0))
-        i₊ = i₋ < lastindex(ts) ? i₋ + 1 : i₋
-    end
-
-    begin
-        dt = ts[i₊] - ts[i₋]
-        Θ = iszero(dt) ? oneunit(tval) / oneunit(dt) : (tval - ts[i₋]) / dt
-
-        # TODO: use manifold Hermite interpolation
-        val = manifold_linear_interpolation(
-            id.manifold,
-            Θ,
-            dt,
-            timeseries[i₋],
-            timeseries[i₊],
-            idxs,
-            deriv,
-        )
-    end
-
-    return val
-end
-
-
-
 """
-    ManifoldLieEuler
+    ManifoldEuler
 
-The Lie-Euler algorithm for problems in the [`ExplicitManifoldODEProblemType`](@ref)
+The manifold Euler algorithm for problems in the [`ExplicitManifoldODEProblemType`](@ref)
 formulation.
 """
-struct ManifoldLieEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
        OrdinaryDiffEqAlgorithm
     manifold::TM
     retraction::TR
 end
 
-alg_order(::ManifoldLieEuler) = 1
+alg_order(::ManifoldEuler) = 1
 
 """
-    LieEulerCache
+    ManifoldEulerCache
 
-Cache for [`ManifoldLieEuler`](@ref).
+Cache for [`ManifoldEuler`](@ref).
 """
-struct LieEulerCache <: OrdinaryDiffEqMutableCache end
+struct ManifoldEulerCache <: OrdinaryDiffEqMutableCache end
 
 """
-    LieEulerConstantCache
+    ManifoldEulerConstantCache
 
-Cache for [`ManifoldLieEuler`](@ref).
+Cache for [`ManifoldEuler`](@ref).
 """
-struct LieEulerConstantCache <: OrdinaryDiffEqConstantCache end
+struct ManifoldEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
-    alg::ManifoldLieEuler,
+    alg::ManifoldEuler,
     u,
     rate_prototype,
     uEltypeNoUnits,
@@ -129,10 +44,10 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return LieEulerCache()
+    return ManifoldEulerCache()
 end
 
-function perform_step!(integrator, cache::LieEulerCache, repeat_step = false)
+function perform_step!(integrator, cache::ManifoldEulerCache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
     k = f(u, p, t)
@@ -141,7 +56,7 @@ function perform_step!(integrator, cache::LieEulerCache, repeat_step = false)
     return integrator.destats.nf += 1
 end
 
-function initialize!(integrator, cache::LieEulerCache)
+function initialize!(integrator, cache::ManifoldEulerCache)
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t) # Pre-start fsal
     integrator.destats.nf += 1
     integrator.kshortsize = 1

@@ -19,9 +19,7 @@ and ``⋅`` is the group action of ``G`` on ``M``.
     Proofs of convergence and order have several assumptions, including time-independence
     of ``F``. Integrators may not work well if these assumptions do not hold.
 """
-struct LieODEProblemType{TG<:AbstractGroupAction}
-    action::TG
-end
+struct LieODEProblemType end
 
 @doc raw"""
     ExplicitManifoldODEProblemType
