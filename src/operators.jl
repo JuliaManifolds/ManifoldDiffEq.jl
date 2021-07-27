@@ -1,7 +1,10 @@
 
 abstract type AbstractVectorTransportOperator end
 
-struct DefaultVectorTransportOperator{TM<:AbstractManifold,TVT<:AbstractVectorTransportMethod} <: AbstractVectorTransportOperator
+struct DefaultVectorTransportOperator{
+    TM<:AbstractManifold,
+    TVT<:AbstractVectorTransportMethod,
+} <: AbstractVectorTransportOperator
     M::TM
     vtm::TVT
 end
@@ -22,13 +25,21 @@ end
 
 DiffEq operator on manifolds in the frozen vector field formulation
 """
-struct FrozenManifoldDiffEqOperator{T<:Number,TF,TVT<:AbstractVectorTransportOperator} <: SciMLBase.AbstractDiffEqOperator{T}
+struct FrozenManifoldDiffEqOperator{T<:Number,TF,TVT<:AbstractVectorTransportOperator} <:
+       SciMLBase.AbstractDiffEqOperator{T}
     func::TF
     operator_vector_transport::TVT
 end
 
-FrozenManifoldDiffEqOperator{T}(f, ovt) where {T<:Number} = FrozenManifoldDiffEqOperator{T,typeof(f),typeof(ovt)}(f, ovt)
-FrozenManifoldDiffEqOperator{T}(f, M::AbstractManifold) where {T<:Number} = FrozenManifoldDiffEqOperator{T}(f, DefaultVectorTransportOperator(M, ParallelTransport()))
+function FrozenManifoldDiffEqOperator{T}(f, ovt) where {T<:Number}
+    return FrozenManifoldDiffEqOperator{T,typeof(f),typeof(ovt)}(f, ovt)
+end
+function FrozenManifoldDiffEqOperator{T}(f, M::AbstractManifold) where {T<:Number}
+    return FrozenManifoldDiffEqOperator{T}(
+        f,
+        DefaultVectorTransportOperator(M, ParallelTransport()),
+    )
+end
 
 function (L::FrozenManifoldDiffEqOperator)(du, u, p, t)
     return copyto!(du, L.func(u, p, t))
