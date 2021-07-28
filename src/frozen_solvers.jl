@@ -72,7 +72,13 @@ end
     CG2
 
 A Crouch-Grossmann algorithm of second order for problems in the
-[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^Owren1999].
+[`ExplicitManifoldODEProblemType`](@ref) formulation. See order 2 conditions discussed
+in [^Owren1999]. Tableau:
+
+0    | 0
+1/2  | 1/2  0
+----------------
+     | 0    1
 
 [^Owren1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
@@ -142,57 +148,94 @@ function initialize!(integrator, cache::CG2Cache)
 end
 
 
+"""
+    CG3
 
-function build_solution(
-    prob::ManifoldODEProblem,
-    alg,
-    t,
-    u;
-    timeseries_errors = length(u) > 2,
-    dense = false,
-    dense_errors = dense,
-    calculate_error = true,
-    k = nothing,
-    interp::InterpolationData,
-    retcode = :Default,
-    destats = nothing,
-    kwargs...,
-)
-    T = eltype(eltype(u))
+A Crouch-Grossmann algorithm of second order for problems in the
+[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^Owren1999]:
 
-    manifold_interp = ManifoldInterpolationData(
-        interp.f,
-        interp.timeseries,
-        interp.ts,
-        interp.ks,
-        interp.dense,
-        interp.cache,
-        prob.manifold,
-    )
-    return ODESolution{
-        T,
-        1,
-        typeof(u),
-        Nothing,
-        Nothing,
-        typeof(t),
-        typeof(k),
-        typeof(prob),
-        typeof(alg),
-        typeof(manifold_interp),
-        typeof(destats),
-    }(
-        u,
-        nothing,
-        nothing,
-        t,
-        k,
-        prob,
-        alg,
-        manifold_interp,
-        dense,
-        0,
-        destats,
-        retcode,
-    )
+ 0     | 0
+ 3/4   | 3/4      0
+ 17/24 | 119/216  17/108  0
+ ------------------------------
+       | 13/51    -2/3    24/17
+
+[^Owren1999]:
+    > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
+    > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
+    > doi: 10.1023/A:1022325426017.
+
+"""
+struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
+    manifold::TM
+    retraction::TR
 end
+
+alg_order(::CG3) = 3
+
+"""
+    CG3Cache
+
+Cache for [`CG3`](@ref).
+"""
+struct CG3Cache <: OrdinaryDiffEqMutableCache end
+
+
+function alg_cache(
+    alg::CG3,
+    u,
+    rate_prototype,
+    uEltypeNoUnits,
+    uBottomEltypeNoUnits,
+    tTypeNoUnits,
+    uprev,
+    uprev2,
+    f,
+    t,
+    dt,
+    reltol,
+    p,
+    calck,
+    ::Val{true},
+)
+    return CG3Cache()
+end
+
+function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
+    @unpack t, dt, uprev, u, f, p, alg = integrator
+
+    k1 = f(u, p, t)
+    c2h = (3//4)*dt
+    c3h = (17//24)*dt
+    a21h = (3//4)*dt
+    a31h = (119//216)*dt
+    a32h = (17//108)*dt
+    b1 = (13//51)*dt
+    b2 = (-2//3)*dt
+    b3 = (24//17)*dt
+    k2u = retract(alg.manifold, u, k1 * a21h, alg.retraction)
+    k2 = f(k2u, p,  t + c2h)
+    k1tk2u = f.f.operator_vector_transport(u, k1, k2u, p, t)
+    k3u = retract(alg.manifold, k2u, a31h * k1tk2u + a32h * k2)
+    k3 = f(k3u, p,  t + c3h)
+
+    k2tu = f.f.operator_vector_transport(k2u, k2, u, p, t)
+    k3tu = f.f.operator_vector_transport(k3u, k3, u, p, t)
+    retract!(alg.manifold, u, u, b1 * k1 + b2 * k2tu + b3 * k3tu, alg.retraction)
+
+    return integrator.destats.nf += 2
+end
+
+function initialize!(integrator, cache::CG3Cache)
+    integrator.kshortsize = 2
+    integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
+
+    integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
+    integrator.destats.nf += 1
+
+    integrator.fsallast = zero.(integrator.fsalfirst)
+    integrator.k[1] = integrator.fsalfirst
+    integrator.k[2] = integrator.fsallast
+    return nothing
+end
+

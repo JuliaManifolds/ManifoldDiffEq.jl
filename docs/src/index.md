@@ -54,11 +54,13 @@ alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), act
 
 alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
+alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
-sol_lie = solve(prob_lie, alg_lie_euler, dt = 0.01)
-sol_frozen = solve(prob_frozen, alg_cg2, dt = 0.01)
+sol_lie = solve(prob_lie, alg_lie_euler, dt = 0.05)
+sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = 0.05)
+sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = 0.05)
 
-for (sol, color) in [(sol_lie, :red), (sol_frozen, :green)]
+for (sol, color) in [(sol_lie, :red), (sol_frozen_cg2, :green), (sol_frozen_cg3, :blue)]
     Makie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 10, color=color)
 end
 ```

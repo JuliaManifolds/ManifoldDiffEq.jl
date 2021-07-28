@@ -51,7 +51,7 @@ struct ExplicitManifoldODEProblemType end
 """
     ManifoldODEProblem
 
-
+Introduced to correctly handle on-manifold interpolation when building a solution.
 """
 struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
        AbstractODEProblem{uType,tType,isinplace}
@@ -176,4 +176,59 @@ function ManifoldODEProblem(
     kwargs...,
 )
     return ManifoldODEProblem(convert(ODEFunction, f), u0, tspan, manifold, p; kwargs...)
+end
+
+
+function build_solution(
+    prob::ManifoldODEProblem,
+    alg,
+    t,
+    u;
+    timeseries_errors = length(u) > 2,
+    dense = false,
+    dense_errors = dense,
+    calculate_error = true,
+    k = nothing,
+    interp::InterpolationData,
+    retcode = :Default,
+    destats = nothing,
+    kwargs...,
+)
+    T = eltype(eltype(u))
+
+    manifold_interp = ManifoldInterpolationData(
+        interp.f,
+        interp.timeseries,
+        interp.ts,
+        interp.ks,
+        interp.dense,
+        interp.cache,
+        prob.manifold,
+    )
+    return ODESolution{
+        T,
+        1,
+        typeof(u),
+        Nothing,
+        Nothing,
+        typeof(t),
+        typeof(k),
+        typeof(prob),
+        typeof(alg),
+        typeof(manifold_interp),
+        typeof(destats),
+    }(
+        u,
+        nothing,
+        nothing,
+        t,
+        k,
+        prob,
+        alg,
+        manifold_interp,
+        dense,
+        0,
+        destats,
+        retcode,
+    )
 end
