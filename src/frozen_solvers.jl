@@ -205,19 +205,19 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
     k1 = f(u, p, t)
-    c2h = (3//4)*dt
-    c3h = (17//24)*dt
-    a21h = (3//4)*dt
-    a31h = (119//216)*dt
-    a32h = (17//108)*dt
-    b1 = (13//51)*dt
-    b2 = (-2//3)*dt
-    b3 = (24//17)*dt
+    c2h = (3 // 4) * dt
+    c3h = (17 // 24) * dt
+    a21h = (3 // 4) * dt
+    a31h = (119 // 216) * dt
+    a32h = (17 // 108) * dt
+    b1 = (13 // 51) * dt
+    b2 = (-2 // 3) * dt
+    b3 = (24 // 17) * dt
     k2u = retract(alg.manifold, u, k1 * a21h, alg.retraction)
-    k2 = f(k2u, p,  t + c2h)
+    k2 = f(k2u, p, t + c2h)
     k1tk2u = f.f.operator_vector_transport(u, k1, k2u, p, t)
     k3u = retract(alg.manifold, k2u, a31h * k1tk2u + a32h * k2)
-    k3 = f(k3u, p,  t + c3h)
+    k3 = f(k3u, p, t + c3h)
 
     k2tu = f.f.operator_vector_transport(k2u, k2, u, p, t)
     k3tu = f.f.operator_vector_transport(k3u, k3, u, p, t)
@@ -238,4 +238,3 @@ function initialize!(integrator, cache::CG3Cache)
     integrator.k[2] = integrator.fsallast
     return nothing
 end
-
