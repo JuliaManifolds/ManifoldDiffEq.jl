@@ -80,4 +80,8 @@ end
     manifold_to_alg_lie_euler =
         (M, action) -> ManifoldDiffEq.ManifoldLieEuler(M, ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_lie_euler; expected_order = 1)
+
+    manifold_to_alg_rkmk4 =
+        (M, action) -> ManifoldDiffEq.RKMK4(M, ExponentialRetraction(), action)
+    test_solver_lie(manifold_to_alg_rkmk4; expected_order = 4)
 end

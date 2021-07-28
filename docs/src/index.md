@@ -51,16 +51,19 @@ prob_frozen = ODEProblem(A_frozen, [0.0, 1.0, 0.0], (0, 20.0))
 
 action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
 alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)
+alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(S2, ExponentialRetraction(), action)
 
 alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
 alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
-sol_lie = solve(prob_lie, alg_lie_euler, dt = 0.05)
-sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = 0.05)
-sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = 0.05)
+dt = 0.2
+sol_lie = solve(prob_lie, alg_lie_euler, dt = dt)
+sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
+sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
+sol_rkmk4 = solve(prob_lie, alg_lie_rkmk4, dt = dt)
 
-for (sol, color) in [(sol_lie, :red), (sol_frozen_cg2, :green), (sol_frozen_cg3, :blue)]
+for (sol, color) in [(sol_lie, :red), (sol_frozen_cg2, :green), (sol_rkmk4, :blue)]
     Makie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 10, color=color)
 end
 ```
