@@ -127,11 +127,8 @@ For more details see [^MuntheKaas1999].
     > Engineering Sciences, vol. 357, no. 1754, pp. 957–981, Apr. 1999,
     > doi: 10.1098/rsta.1999.0361.
 """
-struct RKMK4{
-    TM<:AbstractManifold,
-    TR<:AbstractRetractionMethod,
-    TG<:AbstractGroupAction,
-} <: OrdinaryDiffEqAlgorithm
+struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
+       OrdinaryDiffEqAlgorithm
     manifold::TM
     retraction::TR
     action::TG
@@ -184,15 +181,30 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     k₁ = dt * f(u, p, t)
     Q₁ = k₁
     u₂ = Q₁ / 2
-    k₂ = dt * f(retract(M, u, apply_diff_group(action, cache.id, u₂, u), alg.retraction), p, t + dt/2)
+    k₂ =
+        dt * f(
+            retract(M, u, apply_diff_group(action, cache.id, u₂, u), alg.retraction),
+            p,
+            t + dt / 2,
+        )
     Q₂ = k₂ - k₁
     u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(G, Q₁, Q₂) / 8
-    k₃ = dt * f(retract(M, u, apply_diff_group(action, cache.id, u₃, u), alg.retraction), p, t + dt/2)
+    k₃ =
+        dt * f(
+            retract(M, u, apply_diff_group(action, cache.id, u₃, u), alg.retraction),
+            p,
+            t + dt / 2,
+        )
     Q₃ = k₃ - k₂
     u₄ = Q₁ + Q₂ + Q₃
-    k₄ = dt * f(retract(M, u, apply_diff_group(action, cache.id, u₄, u), alg.retraction), p, t + dt)
+    k₄ =
+        dt * f(
+            retract(M, u, apply_diff_group(action, cache.id, u₄, u), alg.retraction),
+            p,
+            t + dt,
+        )
     Q₄ = k₄ - 2 * k₂ + k₁
-    v = Q₁ + Q₂ + Q₃/3 + Q₄/6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
+    v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
 
     X = apply_diff_group(action, cache.id, v, u)
     retract!(alg.manifold, u, u, X, alg.retraction)
