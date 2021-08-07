@@ -75,10 +75,10 @@ A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See order 2 conditions discussed
 in [^OwrenMarthinsen1999]. Tableau:
 
-0    | 0
-1/2  | 1/2  0
-----------------
-     | 0    1
+    0    | 0
+    1/2  | 1/2  0
+    ----------------
+         | 0    1
 
 [^OwrenMarthinsen1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
@@ -155,11 +155,11 @@ end
 A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^OwrenMarthinsen1999]:
 
- 0     | 0
- 3/4   | 3/4      0
- 17/24 | 119/216  17/108  0
- ------------------------------
-       | 13/51    -2/3    24/17
+    0     | 0
+    3/4   | 3/4      0
+    17/24 | 119/216  17/108  0
+    ------------------------------
+          | 13/51    -2/3    24/17
 
 [^OwrenMarthinsen1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on

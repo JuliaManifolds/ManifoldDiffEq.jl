@@ -7,6 +7,10 @@ makedocs(
     modules = [ManifoldDiffEq],
     authors = "Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename = "ManifoldDiffEq.jl",
-    pages = ["Home" => "index.md"],
+    pages = [
+        "Home" => "index.md",
+        "Lie group action solvers" => "lie_group_solvers.md",
+        "Frozen coefficients solvers" => "frozen_coefficients.md",
+    ],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldDiffEq.jl.git", push_preview = true)

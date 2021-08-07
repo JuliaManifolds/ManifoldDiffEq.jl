@@ -4,8 +4,8 @@
 @doc raw"""
     apply_diff_group(A::AbstractGroupAction, a, X, p)
 
-For a point on manifold ``p ∈ \mathcal M``` and an element `X` of the tangent space at `a`,
-an element of the Lie group of action `A`, ``X ∈ T_a \mathcal G```, compute the
+For a point on manifold ``p ∈ \mathcal M`` and an element `X` of the tangent space at `a`,
+an element of the Lie group of action `A`, ``X ∈ T_a \mathcal G``, compute the
 differential of action of `a` on `p` for vector `X`, as specified by rule `A`.
 When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
 convention, the differential transforms vectors
@@ -37,7 +37,7 @@ struct ManifoldLieEuler{
     TG<:AbstractGroupAction,
 } <: OrdinaryDiffEqAlgorithm
     manifold::TM
-    retraction::TR
+    retraction_method::TR
     action::TG
 end
 
@@ -86,7 +86,7 @@ function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = f
     action = alg.action
     k = apply_diff_group(action, cache.id, X, u)
 
-    retract!(alg.manifold, u, u, dt * k, alg.retraction)
+    retract!(alg.manifold, u, u, dt * k, alg.retraction_method)
 
     return integrator.destats.nf += 1
 end
@@ -112,12 +112,12 @@ end
 The Lie group variant of fourth-order Runge-Kutta algorithm for problems in the
 [`LieODEProblemType`](@ref) formulation. The tableau is:
 
-0    | 0
-1/2  | 1/2  0
-1/2  | 0    1/2  0
-1    | 0    0    1    0
-------------------------------
-     | 1/6  1/3  1/3  1/6
+    0    | 0
+    1/2  | 1/2  0
+    1/2  | 0    1/2  0
+    1    | 0    0    1    0
+    ------------------------------
+         | 1/6  1/3  1/3  1/6
 
 For more details see [^MuntheKaasOwren1999].
 
@@ -130,7 +130,7 @@ For more details see [^MuntheKaasOwren1999].
 struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
        OrdinaryDiffEqAlgorithm
     manifold::TM
-    retraction::TR
+    retraction_method::TR
     action::TG
 end
 
@@ -183,7 +183,7 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₂ = Q₁ / 2
     k₂ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₂, u), alg.retraction),
+            retract(M, u, apply_diff_group(action, cache.id, u₂, u), alg.retraction_method),
             p,
             t + dt / 2,
         )
@@ -191,7 +191,7 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(G, Q₁, Q₂) / 8
     k₃ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₃, u), alg.retraction),
+            retract(M, u, apply_diff_group(action, cache.id, u₃, u), alg.retraction_method),
             p,
             t + dt / 2,
         )
@@ -199,7 +199,7 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₄ = Q₁ + Q₂ + Q₃
     k₄ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₄, u), alg.retraction),
+            retract(M, u, apply_diff_group(action, cache.id, u₄, u), alg.retraction_method),
             p,
             t + dt,
         )
@@ -207,7 +207,7 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
 
     X = apply_diff_group(action, cache.id, v, u)
-    retract!(alg.manifold, u, u, X, alg.retraction)
+    retract!(alg.manifold, u, u, X, alg.retraction_method)
 
     return integrator.destats.nf += 1
 end
