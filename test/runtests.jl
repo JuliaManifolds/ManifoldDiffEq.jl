@@ -13,7 +13,7 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
 
     @testset "Sphere" begin
         M = Sphere(2)
-        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(M) do u, p, t
+        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return cross(u, [1.0, 0.0, 0.0])
         end
         u0 = [0.0, 1.0, 0.0]
@@ -27,7 +27,7 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
 
     @testset "Product manifold" begin
         M = ProductManifold(Sphere(2), Euclidean(3))
-        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(M) do u, p, t
+        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return ProductRepr(cross(u.parts[1], [1.0, 0.0, 0.0]), u.parts[2])
         end
         u0 = ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
@@ -52,7 +52,7 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
         M = Sphere(2)
         action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
 
-        A = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+        A = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
             return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, [1.0, 0.0, 0.0]))
         end
         u0 = [0.0, 1.0, 0.0]
@@ -61,7 +61,6 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
         sol1 = solve(prob, alg, dt = 1 / 8)
 
         @test sol1(0.0) ≈ u0
-        println(sol1(1.0))
         @test is_point(M, sol1(1.0))
     end
 

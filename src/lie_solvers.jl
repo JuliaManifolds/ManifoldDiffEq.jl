@@ -46,7 +46,7 @@ alg_order(::ManifoldLieEuler) = 1
 """
     ManifoldLieEulerCache
 
-Cache for [`ManifoldEuler`](@ref).
+Cache for [`ManifoldLieEuler`](@ref).
 """
 struct ManifoldLieEulerCache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID
@@ -55,7 +55,7 @@ end
 """
     ManifoldLieEulerConstantCache
 
-Cache for [`ManifoldEuler`](@ref).
+Constant cache for [`ManifoldLieEuler`](@ref).
 """
 struct ManifoldLieEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
@@ -76,7 +76,7 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return ManifoldLieEulerCache(Identity(base_group(alg.action), f(u, p, t)))
+    return ManifoldLieEulerCache(Identity(base_group(alg.action)))
 end
 
 function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = false)
@@ -119,9 +119,9 @@ The Lie group variant of fourth-order Runge-Kutta algorithm for problems in the
 ------------------------------
      | 1/6  1/3  1/3  1/6
 
-For more details see [^MuntheKaas1999].
+For more details see [^MuntheKaasOwren1999].
 
-[^MuntheKaas1999]:
+[^MuntheKaasOwren1999]:
     > H. Munthe–Kaas and B. Owren, “Computations in a free Lie algebra,” Philosophical
     > Transactions of the Royal Society of London. Series A: Mathematical, Physical and
     > Engineering Sciences, vol. 357, no. 1754, pp. 957–981, Apr. 1999,
@@ -139,7 +139,7 @@ alg_order(::RKMK4) = 4
 """
     RKMK4Cache
 
-Cache for [`ManifoldEuler`](@ref).
+Cache for [`RKMK4`](@ref).
 """
 struct RKMK4Cache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID
@@ -148,7 +148,7 @@ end
 """
     RKMK4ConstantCache
 
-Cache for [`ManifoldEuler`](@ref).
+Constant cache for [`RKMK4`](@ref).
 """
 struct RKMK4ConstantCache <: OrdinaryDiffEqConstantCache end
 
@@ -169,7 +169,7 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return RKMK4Cache(Identity(base_group(alg.action), f(u, p, t)))
+    return RKMK4Cache(Identity(base_group(alg.action)))
 end
 
 function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)

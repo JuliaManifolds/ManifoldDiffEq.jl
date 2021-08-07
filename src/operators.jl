@@ -1,23 +1,29 @@
 
 abstract type AbstractVectorTransportOperator end
 
-struct DefaultVectorTransportOperator{
-    TM<:AbstractManifold,
-    TVT<:AbstractVectorTransportMethod,
-} <: AbstractVectorTransportOperator
-    M::TM
+struct DefaultVectorTransportOperator{TVT<:AbstractVectorTransportMethod} <:
+       AbstractVectorTransportOperator
     vtm::TVT
 end
 
 """
-    (vto::DefaultVectorTransportOperator)(p, X, q, params, t)
+    (vto::DefaultVectorTransportOperator)(M::AbstractManifold, p, X, q, params, t_from, t_to)
 
 In the frozen coefficient formulation, transport tangent vector `X` such that
-`X = f(p, params, t)` to point `q`. for a given 
+`X = f(p, params, t_from)` to point `q` at time `t_to`. This provides a sort of estimation
+of `f(q, params, t_to)`.
 """
-function (vto::DefaultVectorTransportOperator)(p, X, q, params, t)
+function (vto::DefaultVectorTransportOperator)(
+    M::AbstractManifold,
+    p,
+    X,
+    q,
+    params,
+    t_from,
+    t_to,
+)
     # default implementation, may be customized as needed.
-    return vector_transport_to(vto.M, p, X, q)
+    return vector_transport_to(M, p, X, q)
 end
 
 """
@@ -34,10 +40,10 @@ end
 function FrozenManifoldDiffEqOperator{T}(f, ovt) where {T<:Number}
     return FrozenManifoldDiffEqOperator{T,typeof(f),typeof(ovt)}(f, ovt)
 end
-function FrozenManifoldDiffEqOperator{T}(f, M::AbstractManifold) where {T<:Number}
+function FrozenManifoldDiffEqOperator{T}(f) where {T<:Number}
     return FrozenManifoldDiffEqOperator{T}(
         f,
-        DefaultVectorTransportOperator(M, ParallelTransport()),
+        DefaultVectorTransportOperator(ParallelTransport()),
     )
 end
 
@@ -50,19 +56,21 @@ end
 
 
 """
-    ManifoldDiffEqOperator{T<:Number,TF} <: AbstractDiffEqOperator{T}
+    LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractDiffEqOperator{T}
 
-DiffEq operator on manifolds.
+DiffEq operator on manifolds in the Lie group action formulation.
 """
-struct ManifoldDiffEqOperator{T<:Number,TF} <: SciMLBase.AbstractDiffEqOperator{T}
+struct LieManifoldDiffEqOperator{T<:Number,TF} <: SciMLBase.AbstractDiffEqOperator{T}
     func::TF
 end
 
-ManifoldDiffEqOperator{T}(f) where {T<:Number} = ManifoldDiffEqOperator{T,typeof(f)}(f)
+function LieManifoldDiffEqOperator{T}(f) where {T<:Number}
+    return LieManifoldDiffEqOperator{T,typeof(f)}(f)
+end
 
-function (L::ManifoldDiffEqOperator)(du, u, p, t)
+function (L::LieManifoldDiffEqOperator)(du, u, p, t)
     return copyto!(du, L.func(u, p, t))
 end
-function (L::ManifoldDiffEqOperator)(u, p, t)
+function (L::LieManifoldDiffEqOperator)(u, p, t)
     return L.func(u, p, t)
 end

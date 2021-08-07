@@ -73,14 +73,14 @@ end
 
 A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See order 2 conditions discussed
-in [^Owren1999]. Tableau:
+in [^OwrenMarthinsen1999]. Tableau:
 
 0    | 0
 1/2  | 1/2  0
 ----------------
      | 0    1
 
-[^Owren1999]:
+[^OwrenMarthinsen1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
     > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
     > doi: 10.1023/A:1022325426017.
@@ -124,12 +124,13 @@ end
 function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
+    M = alg.manifold
     k1 = f(u, p, t)
     dt2 = dt / 2
-    tmp = retract(alg.manifold, u, k1 * dt2, alg.retraction)
+    tmp = retract(M, u, k1 * dt2, alg.retraction)
     k2 = f(tmp, p, t + dt2)
-    k2t = f.f.operator_vector_transport(tmp, k2, u, p, t)
-    retract!(alg.manifold, u, u, dt * k2t, alg.retraction)
+    k2t = f.f.operator_vector_transport(M, tmp, k2, u, p, t + dt2, t)
+    retract!(M, u, u, dt * k2t, alg.retraction)
 
     return integrator.destats.nf += 2
 end
@@ -152,7 +153,7 @@ end
     CG3
 
 A Crouch-Grossmann algorithm of second order for problems in the
-[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^Owren1999]:
+[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^OwrenMarthinsen1999]:
 
  0     | 0
  3/4   | 3/4      0
@@ -160,7 +161,7 @@ A Crouch-Grossmann algorithm of second order for problems in the
  ------------------------------
        | 13/51    -2/3    24/17
 
-[^Owren1999]:
+[^OwrenMarthinsen1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
     > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
     > doi: 10.1023/A:1022325426017.
@@ -203,6 +204,7 @@ end
 
 function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
+    M = alg.manifold
 
     k1 = f(u, p, t)
     c2h = (3 // 4) * dt
@@ -213,15 +215,15 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     b1 = (13 // 51) * dt
     b2 = (-2 // 3) * dt
     b3 = (24 // 17) * dt
-    k2u = retract(alg.manifold, u, k1 * a21h, alg.retraction)
+    k2u = retract(M, u, k1 * a21h, alg.retraction)
     k2 = f(k2u, p, t + c2h)
-    k1tk2u = f.f.operator_vector_transport(u, k1, k2u, p, t)
-    k3u = retract(alg.manifold, k2u, a31h * k1tk2u + a32h * k2)
+    k1tk2u = f.f.operator_vector_transport(M, u, k1, k2u, p, t, t + c2h)
+    k3u = retract(M, k2u, a31h * k1tk2u + a32h * k2)
     k3 = f(k3u, p, t + c3h)
 
-    k2tu = f.f.operator_vector_transport(k2u, k2, u, p, t)
-    k3tu = f.f.operator_vector_transport(k3u, k3, u, p, t)
-    retract!(alg.manifold, u, u, b1 * k1 + b2 * k2tu + b3 * k3tu, alg.retraction)
+    k2tu = f.f.operator_vector_transport(M, k2u, k2, u, p, t + c2h, t)
+    k3tu = f.f.operator_vector_transport(M, k3u, k3, u, p, t + c3h, t)
+    retract!(M, u, u, b1 * k1 + b2 * k2tu + b3 * k3tu, alg.retraction)
 
     return integrator.destats.nf += 2
 end
