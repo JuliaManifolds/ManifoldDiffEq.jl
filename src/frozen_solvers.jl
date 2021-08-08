@@ -8,7 +8,7 @@ formulation.
 struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
        OrdinaryDiffEqAlgorithm
     manifold::TM
-    retraction::TR
+    retraction_method::TR
 end
 
 alg_order(::ManifoldEuler) = 1
@@ -51,7 +51,7 @@ function perform_step!(integrator, cache::ManifoldEulerCache, repeat_step = fals
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
     k = f(u, p, t)
-    retract!(alg.manifold, u, u, dt * k, alg.retraction)
+    retract!(alg.manifold, u, u, dt * k, alg.retraction_method)
 
     return integrator.destats.nf += 1
 end
@@ -88,7 +88,7 @@ in [^OwrenMarthinsen1999]. Tableau:
 """
 struct CG2{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
     manifold::TM
-    retraction::TR
+    retraction_method::TR
 end
 
 alg_order(::CG2) = 2
@@ -127,10 +127,10 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
     M = alg.manifold
     k1 = f(u, p, t)
     dt2 = dt / 2
-    tmp = retract(M, u, k1 * dt2, alg.retraction)
+    tmp = retract(M, u, k1 * dt2, alg.retraction_method)
     k2 = f(tmp, p, t + dt2)
     k2t = f.f.operator_vector_transport(M, tmp, k2, u, p, t + dt2, t)
-    retract!(M, u, u, dt * k2t, alg.retraction)
+    retract!(M, u, u, dt * k2t, alg.retraction_method)
 
     return integrator.destats.nf += 2
 end
@@ -169,7 +169,7 @@ A Crouch-Grossmann algorithm of second order for problems in the
 """
 struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
     manifold::TM
-    retraction::TR
+    retraction_method::TR
 end
 
 alg_order(::CG3) = 3
@@ -215,7 +215,7 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     b1 = (13 // 51) * dt
     b2 = (-2 // 3) * dt
     b3 = (24 // 17) * dt
-    k2u = retract(M, u, k1 * a21h, alg.retraction)
+    k2u = retract(M, u, k1 * a21h, alg.retraction_method)
     k2 = f(k2u, p, t + c2h)
     k1tk2u = f.f.operator_vector_transport(M, u, k1, k2u, p, t, t + c2h)
     k3u = retract(M, k2u, a31h * k1tk2u + a32h * k2)
@@ -223,9 +223,9 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
 
     k2tu = f.f.operator_vector_transport(M, k2u, k2, u, p, t + c2h, t)
     k3tu = f.f.operator_vector_transport(M, k3u, k3, u, p, t + c3h, t)
-    retract!(M, u, u, b1 * k1 + b2 * k2tu + b3 * k3tu, alg.retraction)
+    retract!(M, u, u, b1 * k1 + b2 * k2tu + b3 * k3tu, alg.retraction_method)
 
-    return integrator.destats.nf += 2
+    return integrator.destats.nf += 3
 end
 
 function initialize!(integrator, cache::CG3Cache)

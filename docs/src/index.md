@@ -7,12 +7,12 @@ The code below demonstrates usage of __ManifoldDiffEq__ to solve a simple equati
 
 Methods implemented in this library are described in, for example:
 
-    > E. Hairer, C. Lubich, and G. Wanner, Geometric Numerical Integration: Structure-Preserving
-    > Algorithms for Ordinary Differential Equations, 2nd ed. 2006. 2nd printing 2010 edition. Heidelberg ;
-    > New York: Springer, 2010.
+    E. Hairer, C. Lubich, and G. Wanner, Geometric Numerical Integration: Structure-Preserving
+    Algorithms for Ordinary Differential Equations, 2nd ed. 2006. 2nd printing 2010 edition. Heidelberg ;
+    New York: Springer, 2010.
 
 ```julia
-using GLMakie, Makie, LinearAlgebra
+using GLMakie, LinearAlgebra
 
 n = 10
 
@@ -34,7 +34,7 @@ w = [a[3] for a in tans]
 
 scene = Scene();
 
-arr = Makie.arrows(
+arr = GLMakie.arrows(
     vec(x), vec(y), vec(z), u, v, w;
     arrowsize = 0.1, linecolor = (:gray, 0.7), linewidth = 0.02, lengthscale = 0.1
 )
@@ -45,12 +45,12 @@ using ManifoldDiffEq, OrdinaryDiffEq, Manifolds
 # and frozen coefficients (prob_frozen)
 S2 = Manifolds.Sphere(2)
 
-A_lie = ManifoldDiffEq.ManifoldDiffEqOperator{Float64}() do u, p, t
+A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
     return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
 end
 prob_lie = ODEProblem(A_lie, [0.0, 1.0, 0.0], (0, 20.0))
 
-A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(S2) do u, p, t
+A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
     return f2(u...)
 end
 prob_frozen = ODEProblem(A_frozen, [0.0, 1.0, 0.0], (0, 20.0))
@@ -63,13 +63,13 @@ alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
 alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
-dt = 0.2
+dt = 0.05
 sol_lie = solve(prob_lie, alg_lie_euler, dt = dt)
 sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
 sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
 sol_rkmk4 = solve(prob_lie, alg_lie_rkmk4, dt = dt)
 
-for (sol, color) in [(sol_lie, :red), (sol_frozen_cg2, :green), (sol_rkmk4, :blue)]
-    Makie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 10, color=color)
+for (sol, color) in [(sol_lie, :red), (sol_frozen_cg2, :green), (sol_frozen_cg3, :blue)]
+    GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 10, color=color)
 end
 ```

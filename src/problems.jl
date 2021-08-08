@@ -24,22 +24,21 @@ struct LieODEProblemType end
 @doc raw"""
     ExplicitManifoldODEProblemType
 
-An initial value problem manifold ordinary differential equation in the general formulation.
-Can be used to express problems in the vector fields with frozen coefficients formulation by
-Crouch and Grossman, see [^Crouch1993].
+An initial value problem manifold ordinary differential equation in the frozen coefficients
+formulation by Crouch and Grossman, see [^CrouchGrossman1993].
 
-A Lie ODE on manifold ``M`` is defined in terms a vector field ``F: (ℝ × P × M) \to T_p M``
-where ``p`` is the point given as the third argument to ``F``, with an
-initial value ``y₀`` and ``P`` is the space of constant parameters. A solution to this
-problem is a curve ``y:ℝ\to M`` such that ``y(0)=y₀`` and for each ``t ∈ [0, T]`` we have
-``D_t y(t) = F(t, p, y(t))``,
+A frozen coefficients ODE on manifold ``M`` is defined in terms a vector field
+``F: (M × P × ℝ) \to T_p M`` where ``p`` is the point given as the third argument to ``F``,
+with an initial value ``y₀`` and ``P`` is the space of constant parameters. A solution to
+this problem is a curve ``y:ℝ\to M`` such that ``y(0)=y₀`` and for each ``t ∈ [0, T]`` we
+have ``D_t y(t) = F(t, p, y(t))``,
 
 !!! note
 
     Proofs of convergence and order have several assumptions, including time-independence
     of ``F``. Integrators may not work well if these assumptions do not hold.
 
-[^Crouch1993]:
+[^CrouchGrossman1993]:
     > P. E. Crouch and R. Grossman, “Numerical integration of ordinary differential
     > equations on manifolds,” J Nonlinear Sci, vol. 3, no. 1, pp. 1–33, Dec. 1993,
     > doi: 10.1007/BF02429858.

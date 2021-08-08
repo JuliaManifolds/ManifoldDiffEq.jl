@@ -1,4 +1,9 @@
 
+"""
+    AbstractVectorTransportOperator
+
+Abstract type for vector transport operators in the frozen coefficients formulation.
+"""
 abstract type AbstractVectorTransportOperator end
 
 struct DefaultVectorTransportOperator{TVT<:AbstractVectorTransportMethod} <:
