@@ -35,4 +35,5 @@ Order = [:type, :function]
 ManifoldDiffEq.ExplicitManifoldODEProblemType
 ManifoldDiffEq.FrozenManifoldDiffEqOperator
 ManifoldDiffEq.AbstractVectorTransportOperator
+ManifoldDiffEq.DefaultVectorTransportOperator
 ```

@@ -98,10 +98,10 @@ alg_order(::CG2) = 2
 
 Cache for [`CG2`](@ref).
 """
-struct CG2Cache{TK1,TK2u,TK2} <: OrdinaryDiffEqMutableCache
-    k1::TK1
+struct CG2Cache{TX,TK2u} <: OrdinaryDiffEqMutableCache
+    k1::TX
     k2u::TK2u
-    k2::TK2
+    k2::TX
 end
 
 function alg_cache(
@@ -182,7 +182,13 @@ alg_order(::CG3) = 3
 
 Cache for [`CG3`](@ref).
 """
-struct CG3Cache <: OrdinaryDiffEqMutableCache end
+struct CG3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+    k1::TX
+    k2::TX
+    k3::TX
+    k2u::TP
+    k3u::TP
+end
 
 
 function alg_cache(
@@ -202,14 +208,20 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return CG3Cache()
+    return CG3Cache(
+        allocate(rate_prototype),
+        allocate(rate_prototype),
+        allocate(rate_prototype),
+        allocate(u),
+        allocate(u),
+    )
 end
 
 function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
     M = alg.manifold
 
-    k1 = f(u, p, t)
+    f(cache.k1, u, p, t)
     c2h = (3 // 4) * dt
     c3h = (17 // 24) * dt
     a21h = (3 // 4) * dt
@@ -218,20 +230,18 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     b1 = (13 // 51) * dt
     b2 = (-2 // 3) * dt
     b3 = (24 // 17) * dt
-    k2u = retract(M, u, k1 * a21h, alg.retraction_method)
-    k2 = f(k2u, p, t + c2h)
-    #k1tk2u = f.f.operator_vector_transport(M, u, k1, k2u, p, t, t + c2h)
-    k3u = retract(M, u, a31h * k1)
-    k2tk3u = f.f.operator_vector_transport(M, k2u, k2, k3u, p, t, t + c2h)
-    k3u = retract(M, k3u, a32h * k2tk3u)
-    k3 = f(k3u, p, t + c3h)
+    retract!(M, cache.k2u, u, cache.k1 * a21h, alg.retraction_method)
+    f(cache.k2, cache.k2u, p, t + c2h)
+    retract!(M, cache.k3u, u, a31h * cache.k1)
+    k2tk3u = f.f.operator_vector_transport(M, cache.k2u, cache.k2, cache.k3u, p, t, t + c2h)
+    retract!(M, cache.k3u, cache.k3u, a32h * k2tk3u)
+    f(cache.k3, cache.k3u, p, t + c3h)
 
-    retract!(M, u, u, b1 * k1, alg.retraction_method)
-    k2tu = f.f.operator_vector_transport(M, k2u, k2, u, p, t + c2h, t)
+    retract!(M, u, u, b1 * cache.k1, alg.retraction_method)
+    k2tu = f.f.operator_vector_transport(M, cache.k2u, cache.k2, u, p, t + c2h, t)
     retract!(M, u, u, b2 * k2tu, alg.retraction_method)
-    k3tu = f.f.operator_vector_transport(M, k3u, k3, u, p, t + c3h, t)
+    k3tu = f.f.operator_vector_transport(M, cache.k3u, cache.k3, u, p, t + c3h, t)
     retract!(M, u, u, b3 * k3tu, alg.retraction_method)
-
 
     return integrator.destats.nf += 3
 end
