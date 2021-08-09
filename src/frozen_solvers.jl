@@ -98,8 +98,11 @@ alg_order(::CG2) = 2
 
 Cache for [`CG2`](@ref).
 """
-struct CG2Cache <: OrdinaryDiffEqMutableCache end
-
+struct CG2Cache{TK1,TK2u,TK2} <: OrdinaryDiffEqMutableCache
+    k1::TK1
+    k2u::TK2u
+    k2::TK2
+end
 
 function alg_cache(
     alg::CG2,
@@ -118,21 +121,7 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return CG2Cache()
-end
-
-function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
-    @unpack t, dt, uprev, u, f, p, alg = integrator
-
-    M = alg.manifold
-    k1 = f(u, p, t)
-    dt2 = dt / 2
-    tmp = retract(M, u, k1 * dt2, alg.retraction_method)
-    k2 = f(tmp, p, t + dt2)
-    k2t = f.f.operator_vector_transport(M, tmp, k2, u, p, t + dt2, t)
-    retract!(M, u, u, dt * k2t, alg.retraction_method)
-
-    return integrator.destats.nf += 2
+    return CG2Cache(allocate(rate_prototype), u, allocate(rate_prototype))
 end
 
 function initialize!(integrator, cache::CG2Cache)
@@ -146,4 +135,18 @@ function initialize!(integrator, cache::CG2Cache)
     integrator.k[1] = integrator.fsalfirst
     integrator.k[2] = integrator.fsallast
     return nothing
+end
+
+function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
+    @unpack t, dt, uprev, u, f, p, alg = integrator
+
+    M = alg.manifold
+    f(cache.k1, u, p, t)
+    dt2 = dt / 2
+    retract!(M, cache.k2u, u, cache.k1 * dt2, alg.retraction_method)
+    f(cache.k2, cache.k2u, p, t + dt2)
+    k2t = f.f.operator_vector_transport(M, cache.k2u, cache.k2, u, p, t + dt2, t)
+    retract!(M, u, u, dt * k2t, alg.retraction_method)
+
+    return integrator.destats.nf += 2
 end
