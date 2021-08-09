@@ -121,7 +121,7 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return CG2Cache(allocate(rate_prototype), u, allocate(rate_prototype))
+    return CG2Cache(allocate(rate_prototype), allocate(u), allocate(rate_prototype))
 end
 
 function initialize!(integrator, cache::CG2Cache)
@@ -149,4 +149,102 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
     retract!(M, u, u, dt * k2t, alg.retraction_method)
 
     return integrator.destats.nf += 2
+end
+
+
+"""
+    CG3
+
+A Crouch-Grossmann algorithm of second order for problems in the
+[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^OwrenMarthinsen1999]:
+
+    0     | 0
+    3/4   | 3/4      0
+    17/24 | 119/216  17/108  0
+    ------------------------------
+          | 13/51    -2/3    24/17
+
+[^OwrenMarthinsen1999]:
+    > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
+    > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
+    > doi: 10.1023/A:1022325426017.
+
+"""
+struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
+    manifold::TM
+    retraction_method::TR
+end
+
+alg_order(::CG3) = 3
+
+"""
+    CG3Cache
+
+Cache for [`CG3`](@ref).
+"""
+struct CG3Cache <: OrdinaryDiffEqMutableCache end
+
+
+function alg_cache(
+    alg::CG3,
+    u,
+    rate_prototype,
+    uEltypeNoUnits,
+    uBottomEltypeNoUnits,
+    tTypeNoUnits,
+    uprev,
+    uprev2,
+    f,
+    t,
+    dt,
+    reltol,
+    p,
+    calck,
+    ::Val{true},
+)
+    return CG3Cache()
+end
+
+function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
+    @unpack t, dt, uprev, u, f, p, alg = integrator
+    M = alg.manifold
+
+    k1 = f(u, p, t)
+    c2h = (3 // 4) * dt
+    c3h = (17 // 24) * dt
+    a21h = (3 // 4) * dt
+    a31h = (119 // 216) * dt
+    a32h = (17 // 108) * dt
+    b1 = (13 // 51) * dt
+    b2 = (-2 // 3) * dt
+    b3 = (24 // 17) * dt
+    k2u = retract(M, u, k1 * a21h, alg.retraction_method)
+    k2 = f(k2u, p, t + c2h)
+    #k1tk2u = f.f.operator_vector_transport(M, u, k1, k2u, p, t, t + c2h)
+    k3u = retract(M, u, a31h * k1)
+    k2tk3u = f.f.operator_vector_transport(M, k2u, k2, k3u, p, t, t + c2h)
+    k3u = retract(M, k3u, a32h * k2tk3u)
+    k3 = f(k3u, p, t + c3h)
+
+    retract!(M, u, u, b1 * k1, alg.retraction_method)
+    k2tu = f.f.operator_vector_transport(M, k2u, k2, u, p, t + c2h, t)
+    retract!(M, u, u, b2 * k2tu, alg.retraction_method)
+    k3tu = f.f.operator_vector_transport(M, k3u, k3, u, p, t + c3h, t)
+    retract!(M, u, u, b3 * k3tu, alg.retraction_method)
+
+
+    return integrator.destats.nf += 3
+end
+
+function initialize!(integrator, cache::CG3Cache)
+    integrator.kshortsize = 2
+    integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
+
+    integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
+    integrator.destats.nf += 1
+
+    integrator.fsallast = zero.(integrator.fsalfirst)
+    integrator.k[1] = integrator.fsalfirst
+    integrator.k[2] = integrator.fsallast
+    return nothing
 end

@@ -63,7 +63,7 @@ alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
 alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
-dt = 0.05
+dt = 0.2
 sol_lie = solve(prob_lie, alg_lie_euler, dt = dt)
 sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
 sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
