@@ -9,8 +9,8 @@ where ``𝔤`` is the Lie algebra of a Lie group ``G`` acting on ``M``, with an
 initial value ``y₀`` and ``P`` is the space of constant parameters. A solution to this
 problem is a curve ``y:ℝ\to M`` such that ``y(0)=y₀`` and for each ``t ∈ [0, T]`` we have
 ``D_t y(t) = f(t, y(t))∘y(t)``, where the ``∘`` is defined as
-````
-X⋅m = \frac{d}{dt}\vert_{t=0} \exp(tZ)⋅m
+````math
+X∘m = \frac{d}{dt}\vert_{t=0} \exp(tZ)⋅m
 ````
 and ``⋅`` is the group action of ``G`` on ``M``.
 

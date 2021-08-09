@@ -73,9 +73,6 @@ end
     manifold_to_alg_cg2 = M -> ManifoldDiffEq.CG2(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg2; expected_order = 2)
 
-    manifold_to_alg_cg3 = M -> ManifoldDiffEq.CG3(M, ExponentialRetraction())
-    test_solver_frozen(manifold_to_alg_cg3; expected_order = 3)
-
     manifold_to_alg_lie_euler =
         (M, action) -> ManifoldDiffEq.ManifoldLieEuler(M, ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_lie_euler; expected_order = 1)
