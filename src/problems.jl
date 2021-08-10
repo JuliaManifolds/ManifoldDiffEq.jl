@@ -8,7 +8,7 @@ A Lie ODE on manifold ``M`` is defined in terms a vector field ``F: (ℝ × P ×
 where ``𝔤`` is the Lie algebra of a Lie group ``G`` acting on ``M``, with an
 initial value ``y₀`` and ``P`` is the space of constant parameters. A solution to this
 problem is a curve ``y:ℝ\to M`` such that ``y(0)=y₀`` and for each ``t ∈ [0, T]`` we have
-``D_t y(t) = f(t, y(t))∘y(t)``, where the ``∘`` is defined as
+``D_t y(t) = F(y(t), p, t)∘y(t)``, where the ``∘`` is defined as
 ````math
 X∘m = \frac{d}{dt}\vert_{t=0} \exp(tZ)⋅m
 ````
@@ -31,7 +31,7 @@ A frozen coefficients ODE on manifold ``M`` is defined in terms a vector field
 ``F: (M × P × ℝ) \to T_p M`` where ``p`` is the point given as the third argument to ``F``,
 with an initial value ``y₀`` and ``P`` is the space of constant parameters. A solution to
 this problem is a curve ``y:ℝ\to M`` such that ``y(0)=y₀`` and for each ``t ∈ [0, T]`` we
-have ``D_t y(t) = F(t, p, y(t))``,
+have ``D_t y(t) = F(y(t), p, t)``,
 
 !!! note
 

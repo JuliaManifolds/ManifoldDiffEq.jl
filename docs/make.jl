@@ -11,6 +11,8 @@ makedocs(
         "Home" => "index.md",
         "Lie group action solvers" => "lie_group_solvers.md",
         "Frozen coefficients solvers" => "frozen_coefficients.md",
+        "Notation" => "notation.md",
+        "Examples" => "examples.md",
     ],
 )
 deploydocs(repo = "github.com/JuliaManifolds/ManifoldDiffEq.jl.git", push_preview = true)
