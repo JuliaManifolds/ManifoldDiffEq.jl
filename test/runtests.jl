@@ -66,15 +66,77 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
 
 end
 
+# constructing tableaus for comparison with DiffEq on the Euclidean space
+function constructME(T::Type = Float64)
+    A = fill(0, 1, 1)
+    c = [0]
+    α = [1]
+    A = map(T, A)
+    α = map(T, α)
+    c = map(T, c)
+    return (DiffEqBase.ExplicitRKTableau(A, c, α, 1))
+end
+
+function constructCG2(T::Type = Float64)
+    A = [
+        0 0
+        1//2 0
+    ]
+    c = [0, 1 // 2]
+    α = [0, 1]
+    A = map(T, A)
+    α = map(T, α)
+    c = map(T, c)
+    return (DiffEqBase.ExplicitRKTableau(A, c, α, 2))
+end
+
+function constructCG3(T::Type = Float64)
+    A = [
+        0 0 0
+        3//4 0 0
+        119//216 17/108 0
+    ]
+    c = [0, 3 // 4, 17 // 24]
+    α = [13 // 51, -2 // 3, 24 // 17]
+    A = map(T, A)
+    α = map(T, α)
+    c = map(T, c)
+    return (DiffEqBase.ExplicitRKTableau(A, c, α, 3))
+end
+
+function compare_with_diffeq_frozen(manifold_to_alg, tableau)
+    M = Euclidean(2)
+    # damped harmonic oscillator d^2u/dt^2 + c du/dt + ku = 0
+    k = -0.25
+    c = 1
+    f(u, p, t) = [-c * u[1] - k * u[2], u[1]]
+    A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(f)
+    u0 = [-1.0, 1.0]
+    alg = manifold_to_alg(M)
+    tspan = (0, 2.0)
+    dt = 1 / 8
+    prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A, u0, tspan, M)
+    sol_frozen = solve(prob_frozen, alg, dt = dt)
+
+    alg_diffeq = OrdinaryDiffEq.ExplicitRK(tableau)
+    prob_diffeq = ODEProblem(A, u0, tspan)
+    sol_diffeq = solve(prob_diffeq, alg_diffeq; dt = dt, adaptive = false)
+
+    @test isapprox(sol_frozen.u, sol_diffeq.u)
+end
+
 @testset "ManifoldDiffEq" begin
     manifold_to_alg_me = M -> ManifoldDiffEq.ManifoldEuler(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_me; expected_order = 1)
+    compare_with_diffeq_frozen(manifold_to_alg_me, constructME())
 
     manifold_to_alg_cg2 = M -> ManifoldDiffEq.CG2(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg2; expected_order = 2)
+    compare_with_diffeq_frozen(manifold_to_alg_cg2, constructCG2())
 
     manifold_to_alg_cg3 = M -> ManifoldDiffEq.CG3(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg3; expected_order = 3)
+    compare_with_diffeq_frozen(manifold_to_alg_cg3, constructCG3())
 
     manifold_to_alg_lie_euler =
         (M, action) -> ManifoldDiffEq.ManifoldLieEuler(M, ExponentialRetraction(), action)
