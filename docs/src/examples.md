@@ -69,7 +69,7 @@ acting on data with 2 solvers and direct solvers on the sphere, using 3 other so
 
 ```julia
 S2 = Manifolds.Sphere(2)
-u0 = [0.0, 1/sqrt(9/10), sqrt(1/10)]
+u0 = [0.0, sqrt(9/10), sqrt(1/10)]
 tspan = (0, 20.0)
 
 A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
@@ -98,7 +98,7 @@ sol_frozen = solve(prob_frozen, alg_manifold_euler, dt=dt)
 sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
 sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
 
-plot_sol(sol,col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol_lie.u]; linewidth = 3, color=col)
+plot_sol(sol,col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol_lie.u]; linewidth = 2, color=col)
 
 l1 = plot_sol(sol_lie, colorant"#999933")
 l2 = plot_sol(sol_rkmk4, colorant"#DDCC77")
