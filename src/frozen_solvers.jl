@@ -47,7 +47,7 @@ function alg_cache(
     return ManifoldEulerCache()
 end
 
-function perform_step!(integrator, cache::ManifoldEulerCache, repeat_step = false)
+function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
     k = f(u, p, t)
@@ -56,7 +56,7 @@ function perform_step!(integrator, cache::ManifoldEulerCache, repeat_step = fals
     return integrator.destats.nf += 1
 end
 
-function initialize!(integrator, cache::ManifoldEulerCache)
+function initialize!(integrator, ::ManifoldEulerCache)
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t) # Pre-start fsal
     integrator.destats.nf += 1
     integrator.kshortsize = 1
@@ -68,23 +68,21 @@ function initialize!(integrator, cache::ManifoldEulerCache)
 end
 
 
-"""
+@doc raw"""
     CG2
 
 A Crouch-Grossmann algorithm of second order for problems in the
-[`ExplicitManifoldODEProblemType`](@ref) formulation. See order 2 conditions discussed
-in [^OwrenMarthinsen1999]. Tableau:
+[`ExplicitManifoldODEProblemType`](@ref) formulation.
+The Butcher tableau is identical to the Euclidean RK2:
 
-    0    | 0
-    1/2  | 1/2  0
-    ----------------
-         | 0    1
-
-[^OwrenMarthinsen1999]:
-    > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
-    > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
-    > doi: 10.1023/A:1022325426017.
-
+```math
+\begin{array}{c|cc}
+0 & 0 \\
+\frac{1}{2} & \frac{1}{2} & 0 \\
+\hline
+& 0 & 1
+\end{array}
+```
 """
 struct CG2{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
     manifold::TM
@@ -152,22 +150,26 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
 end
 
 
-"""
+@doc raw"""
     CG3
 
 A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^OwrenMarthinsen1999]:
 
-    0     | 0
-    3/4   | 3/4      0
-    17/24 | 119/216  17/108  0
-    ------------------------------
-          | 13/51    -2/3    24/17
+```math
+\begin{array}{c|ccc}
+0 & 0 \\
+\frac{3}{4} & \frac{3}{4} & 0 \\
+\frac{17}{24} & \frac{119}{216} & \frac{17}{108} & 0\\
+\hline
+& \frac{13}{51} & -\frac{2}{3} & \frac{24}{17}
+\end{array}
+```
 
 [^OwrenMarthinsen1999]:
     > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
     > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
-    > doi: 10.1023/A:1022325426017.
+    > doi: [10.1023/A:1022325426017](https://doi.org/10.1023/A:1022325426017).
 
 """
 struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
@@ -246,7 +248,7 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     return integrator.destats.nf += 3
 end
 
-function initialize!(integrator, cache::CG3Cache)
+function initialize!(integrator, ::CG3Cache)
     integrator.kshortsize = 2
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 

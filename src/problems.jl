@@ -41,7 +41,7 @@ have ``D_t y(t) = F(y(t), p, t)``,
 [^CrouchGrossman1993]:
     > P. E. Crouch and R. Grossman, “Numerical integration of ordinary differential
     > equations on manifolds,” J Nonlinear Sci, vol. 3, no. 1, pp. 1–33, Dec. 1993,
-    > doi: 10.1007/BF02429858.
+    > doi: [10.1007/BF02429858](https://doi.org/10.1007/BF02429858).
 
 """
 struct ExplicitManifoldODEProblemType end
@@ -50,15 +50,25 @@ struct ExplicitManifoldODEProblemType end
 """
     ManifoldODEProblem
 
-Introduced to correctly handle on-manifold interpolation when building a solution.
+A general problem for ODE problems on Riemannian manifolds.
+
+# Fields
+
+* `f` the tangent vector field `f(u,p,t)`
+* `u0` the initial condition
+* `tspan` time interval for the solution
+* `p` constant parameters for `f``
+* `kwargs` A callback to be applied to every solver which uses the problem.
+* `problem_type` type of problem
+* `manifold` the manifold the vector field is defined on
 """
 struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
        AbstractODEProblem{uType,tType,isinplace}
-    f::F # The ODE is `du/dt = f(u,p,t)`.
-    u0::uType # The initial condition is `u(tspan[1]) = u0`.
-    tspan::tType # The solution `u(t)` will be computed for `tspan[1] ≤ t ≤ tspan[2]`.
-    p::P # Constant parameters to be supplied as the second argument of `f`.
-    kwargs::K # A callback to be applied to every solver which uses the problem.
+    f::F
+    u0::uType
+    tspan::tType
+    p::P
+    kwargs::K
     problem_type::PT
     manifold::TM
     function ManifoldODEProblem{iip}(

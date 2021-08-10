@@ -53,15 +53,11 @@ u_{n+1} &= \exp_{u_{b,s-1}}(h b_s X_{b,s})
 
 Vector transports correspond to handling frozen coefficients. Note that the implementation allows for easy substitution of methods used for calculation of the exponential map (for example to use an approximation) and vector transport (if the default vector transport is not suitable for the problem).
 
-
-[^CrouchGrossman1993]:
-    > P. E. Crouch and R. Grossman, “Numerical integration of ordinary differential
-    > equations on manifolds,” J Nonlinear Sci, vol. 3, no. 1, pp. 1–33, Dec. 1993,
-    > doi: 10.1007/BF02429858.
-
 [^CelledoniMarthinsenOwren2014]:
-    > E. Celledoni, H. Marthinsen, and B. Owren, “An introduction to Lie group integrators -- basics, new developments and applications,” Journal of Computational Physics, vol. 257, pp. 1040–1061, Jan. 2014, doi: 10.1016/j.jcp.2012.12.031.
-
+    > E. Celledoni, H. Marthinsen, and B. Owren,
+    > “An introduction to Lie group integrators -- basics, new developments and applications,”
+    > Journal of Computational Physics, vol. 257, pp. 1040–1061, Jan. 2014,
+    > doi: [10.1016/j.jcp.2012.12.031](https://doi.org/10.1016/j.jcp.2012.12.031).
 
 ```@autodocs
 Modules = [ManifoldDiffEq]
@@ -75,3 +71,5 @@ ManifoldDiffEq.FrozenManifoldDiffEqOperator
 ManifoldDiffEq.AbstractVectorTransportOperator
 ManifoldDiffEq.DefaultVectorTransportOperator
 ```
+
+## Literature

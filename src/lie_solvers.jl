@@ -106,18 +106,23 @@ end
 
 
 
-"""
+@doc raw"""
     RKMK4
 
 The Lie group variant of fourth-order Runge-Kutta algorithm for problems in the
-[`LieODEProblemType`](@ref) formulation. The tableau is:
+[`LieODEProblemType`](@ref) formulation, called Runge-Kutta Munthe-Kaas.
+The Nutcher tableau is:
 
-    0    | 0
-    1/2  | 1/2  0
-    1/2  | 0    1/2  0
-    1    | 0    0    1    0
-    ------------------------------
-         | 1/6  1/3  1/3  1/6
+```math
+\begin{array}{c|cccc}
+0 & 0 \\
+\frac{1}{2} & 0 & \frac{1}{2} & 0 \\
+\frac{1}{2} & \frac{1}{2} & 0 \\
+1 & 0 & 0 & 1 & 0\\
+\hline
+& \frac{1}{6} & \frac{1}{3} & \frac{1}{6} & \frac{1}{6}
+\end{array}
+```
 
 For more details see [^MuntheKaasOwren1999].
 
@@ -125,7 +130,7 @@ For more details see [^MuntheKaasOwren1999].
     > H. Munthe–Kaas and B. Owren, “Computations in a free Lie algebra,” Philosophical
     > Transactions of the Royal Society of London. Series A: Mathematical, Physical and
     > Engineering Sciences, vol. 357, no. 1754, pp. 957–981, Apr. 1999,
-    > doi: 10.1098/rsta.1999.0361.
+    > doi: [10.1098/rsta.1999.0361](https://doi.org/10.1098/rsta.1999.0361).
 """
 struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
        OrdinaryDiffEqAlgorithm
