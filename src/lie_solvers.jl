@@ -25,6 +25,15 @@ function apply_diff_group(
     return X * p
 end
 
+function apply_diff_group(
+    ::Manifolds.TranslationAction{N,F,LeftAction},
+    ::Identity,
+    X,
+    p,
+) where {N,F}
+    return X
+end
+
 """
     ManifoldLieEuler
 
