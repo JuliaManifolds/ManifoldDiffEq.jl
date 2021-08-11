@@ -15,4 +15,8 @@ makedocs(
         "Examples" => "examples.md",
     ],
 )
-deploydocs(repo = "github.com/JuliaManifolds/ManifoldDiffEq.jl.git", push_preview = true)
+deploydocs(
+    repo = "github.com/JuliaManifolds/ManifoldDiffEq.jl.git",
+    push_preview = true,
+    devbranch = "main",
+)
