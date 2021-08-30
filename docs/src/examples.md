@@ -98,7 +98,7 @@ sol_frozen = solve(prob_frozen, alg_manifold_euler, dt=dt)
 sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
 sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
 
-plot_sol(sol,col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol_lie.u]; linewidth = 2, color=col)
+plot_sol(sol,col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 2, color=col)
 
 l1 = plot_sol(sol_lie, colorant"#999933")
 l2 = plot_sol(sol_rkmk4, colorant"#DDCC77")

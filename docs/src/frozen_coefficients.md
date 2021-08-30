@@ -51,7 +51,7 @@ u_{n+1} &= \exp_{u_{b,s-1}}(h b_s X_{b,s})
 \end{align*}
 ````
 
-Vector transports correspond to handling frozen coefficients. Note that the implementation allows for easy substitution of methods used for calculation of the exponential map (for example to use an approximation) and vector transport (if the default vector transport is not suitable for the problem).
+Vector transports correspond to handling frozen coefficients. Note that the implementation allows for easy substitution of methods used for calculation of the exponential map (for example to use an approximation) and vector transport (if the default vector transport is not suitable for the problem). It is desirable to use a flat vector transport instead of a torsion-free one when available, for example the plus or minus Cartan-Schouten connections on Lie groups.
 
 [^CelledoniMarthinsenOwren2014]:
     > E. Celledoni, H. Marthinsen, and B. Owren,
