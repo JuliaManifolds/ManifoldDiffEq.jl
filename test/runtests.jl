@@ -5,7 +5,7 @@ using OrdinaryDiffEq: OrdinaryDiffEq, alg_order
 using LinearAlgebra
 using DiffEqBase
 
-function test_solver_frozen(manifold_to_alg; expected_order = nothing)
+function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive = false)
     expected_order !== nothing && @testset "alg_order" begin
         alg = manifold_to_alg(Sphere(2))
         @test alg_order(alg) == expected_order
@@ -19,7 +19,11 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
         u0 = [0.0, 1.0, 0.0]
         alg = manifold_to_alg(M)
         prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
-        sol1 = solve(prob, alg, dt = 1 / 8)
+        sol1 = if adaptive
+            solve(prob, alg)
+        else
+            solve(prob, alg, dt = 1 / 8)
+        end
 
         @test sol1(0.0) ≈ u0
         @test is_point(M, sol1(1.0))
@@ -33,7 +37,11 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing)
         u0 = ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
         alg = manifold_to_alg(M)
         prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
-        sol1 = solve(prob, alg, dt = 1 / 8)
+        sol1 = if adaptive
+            solve(prob, alg)
+        else
+            solve(prob, alg, dt = 1 / 8)
+        end
 
         @test isapprox(M, sol1(0.0), u0)
         @test is_point(M, sol1(1.0))
@@ -172,6 +180,9 @@ end
     manifold_to_alg_cg2 = M -> ManifoldDiffEq.CG2(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg2; expected_order = 2)
     compare_with_diffeq_frozen(manifold_to_alg_cg2, constructCG2())
+
+    manifold_to_alg_cg23 = M -> ManifoldDiffEq.CG23(M, ExponentialRetraction())
+    test_solver_frozen(manifold_to_alg_cg23; expected_order = 2, adaptive = true)
 
     manifold_to_alg_cg3 = M -> ManifoldDiffEq.CG3(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg3; expected_order = 3)

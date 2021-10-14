@@ -150,6 +150,146 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
 end
 
 
+
+@doc raw"""
+    CG23
+
+A Crouch-Grossmann algorithm of order 2(3) for problems in the
+[`ExplicitManifoldODEProblemType`](@ref) formulation.
+The Butcher tableau reads:
+
+```math
+\begin{array}{c|ccc}
+0 & 0 \\
+\frac{3}{4} & \frac{3}{4} & 0 \\
+\frac{17}{24} & \frac{119}{216} & \frac{17}{108} & 0\\
+\hline
+& \frac{17}{54} & \frac{19}{54} & \frac{1}{3}
+& \frac{13}{51} & -\frac{2}{3} & \frac{24}{17}
+\end{array}
+```
+The last row is used for error estimation.
+
+"""
+struct CG23{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+       OrdinaryDiffEqAdaptiveAlgorithm
+    manifold::TM
+    retraction_method::TR
+end
+
+alg_order(::CG23) = 2
+
+"""
+    CG23Cache
+
+Cache for [`CG23`](@ref).
+"""
+struct CG23Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+    X1::TX
+    X2::TX
+    X3::TX
+    X2u::TP
+    X3u::TP
+    uhat::TP
+end
+
+function alg_cache(
+    alg::CG23,
+    u,
+    rate_prototype,
+    uEltypeNoUnits,
+    uBottomEltypeNoUnits,
+    tTypeNoUnits,
+    uprev,
+    uprev2,
+    f,
+    t,
+    dt,
+    reltol,
+    p,
+    calck,
+    ::Val{true},
+)
+    return CG23Cache(
+        allocate(rate_prototype),
+        allocate(rate_prototype),
+        allocate(rate_prototype),
+        allocate(u),
+        allocate(u),
+        allocate(u),
+    )
+end
+
+function initialize!(integrator, cache::CG23Cache)
+    integrator.kshortsize = 2
+    integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
+
+    integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
+    integrator.destats.nf += 1
+
+    integrator.fsallast = zero.(integrator.fsalfirst)
+    integrator.k[1] = integrator.fsalfirst
+    integrator.k[2] = integrator.fsallast
+    return nothing
+end
+
+function perform_step!(integrator, cache::CG23Cache, repeat_step = false)
+    @unpack t, dt, uprev, u, f, p, alg = integrator
+    M = alg.manifold
+
+    f(cache.X1, u, p, t)
+    c2h = (3 // 4) * dt
+    c3h = (17 // 24) * dt
+    a21h = (3 // 4) * dt
+    a31h = (119 // 216) * dt
+    a32h = (17 // 108) * dt
+    b1 = (17 // 54) * dt
+    b2 = (19 // 54) * dt
+    b3 = (1 // 3) * dt
+    b1hat = (13 // 51) * dt
+    b2hat = (-2 // 3) * dt
+    b3hat = (24 // 17) * dt
+    retract!(M, cache.X2u, u, cache.X1 * a21h, alg.retraction_method)
+    f(cache.X2, cache.X2u, p, t + c2h)
+    retract!(M, cache.X3u, u, a31h * cache.X1)
+    k2tk3u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X3u, p, t, t + c2h)
+    retract!(M, cache.X3u, cache.X3u, a32h * k2tk3u)
+    f(cache.X3, cache.X3u, p, t + c3h)
+    if integrator.opts.adaptive
+        copyto!(M, cache.uhat, u)
+    end
+
+    retract!(M, u, u, b1 * cache.X1, alg.retraction_method)
+    X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + c2h, t)
+    retract!(M, u, u, b2 * X2tu, alg.retraction_method)
+    X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, u, p, t + c3h, t)
+    retract!(M, u, u, b3 * X3tu, alg.retraction_method)
+
+    if integrator.opts.adaptive
+        uhat = cache.uhat
+        retract!(M, uhat, uhat, b1hat * cache.X1, alg.retraction_method)
+        X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, uhat, p, t + c2h, t)
+        retract!(M, uhat, uhat, b2hat * X2tu, alg.retraction_method)
+        X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, uhat, p, t + c3h, t)
+        retract!(M, uhat, uhat, b3hat * X3tu, alg.retraction_method)
+
+        integrator.EEst = calculate_eest(
+            M,
+            uhat,
+            uprev,
+            u,
+            integrator.opts.abstol,
+            integrator.opts.reltol,
+            integrator.opts.internalnorm,
+            t,
+        )
+    end
+
+    return integrator.destats.nf += 3
+end
+
+
+
 @doc raw"""
     CG3
 
