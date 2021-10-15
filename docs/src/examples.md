@@ -77,8 +77,7 @@ A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
 end
 prob_lie = ManifoldDiffEq.ManifoldODEProblem(A_lie, u0, tspan, S2)
 
-vto = ManifoldDiffEq.DefaultVectorTransportOperator(ManifoldDiffEq.PointFlattenedVectorTransport(ParallelTransport(), u0))
-A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(vto) do u, p, t
+A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
     return f2(u...)
 end
 prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A_frozen, u0, tspan, S2)
