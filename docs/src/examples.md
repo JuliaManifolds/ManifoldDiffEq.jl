@@ -57,7 +57,7 @@ arr = GLMakie.arrows!(
            vec(x), vec(y), vec(z), u, v, w;
            arrowsize = 0.02, linecolor = (:gray, 0.7), linewidth = 0.0075, lengthscale = 0.1
 )
-save("docs/src/assets/img/first_example_vector_field.png",f)
+save("docs/src/assets/img/first_example_vector_field.png", f)
 ```
 which looks like
 
@@ -77,7 +77,8 @@ A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
 end
 prob_lie = ManifoldDiffEq.ManifoldODEProblem(A_lie, u0, tspan, S2)
 
-A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+vto = ManifoldDiffEq.DefaultVectorTransportOperator(ManifoldDiffEq.PointFlattenedVectorTransport(ParallelTransport(), u0))
+A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(vto) do u, p, t
     return f2(u...)
 end
 prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A_frozen, u0, tspan, S2)
@@ -88,7 +89,7 @@ alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(S2, ExponentialRetraction(), action)
 
 alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
-alg_cg23 = ManifoldDiffEq.CG23(S2, ExponentialRetraction())
+alg_cg23 = ManifoldDiffEq.CG2_3(S2, ExponentialRetraction())
 alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
 dt = 0.1
@@ -112,7 +113,7 @@ Legend(f[1, 2],
     [l1, l2, l3, l4, l5, l6],
     ["Lie Euler", "RKMK4", "Euler", "CG2", "CG2(3)", "CG3"]
 )
-save("docs/src/assets/img/first_example_solutions.png",f)
+save("docs/src/assets/img/first_example_solutions.png", f)
 ```
 
 And the solutions look like

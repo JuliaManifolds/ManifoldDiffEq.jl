@@ -112,6 +112,42 @@ function constructCG3(T::Type = Float64)
     return (DiffEqBase.ExplicitRKTableau(A, c, α, 3))
 end
 
+function constructCG4a(T::Type = Float64)
+    c2 = 0.8177227988124852
+    c3 = 0.3859740639032449
+    c4 = 0.3242290522866937
+    c5 = 0.8768903263420429
+    a21 = 0.8177227988124852
+    a31 = 0.3199876375476427
+    a41 = 0.9214417194464946
+    a51 = 0.3552358559023322
+    a32 = 0.0659864263556022
+    a42 = 0.4997857776773573
+    a52 = 0.2390958372307326
+    a43 = -1.0969984448371582
+    a53 = 1.3918565724203246
+    a54 = -1.1092979392113465
+    b1 = 0.1370831520630755
+    b2 = -0.0183698531564020
+    b3 = 0.7397813985370780
+    b4 = -0.1907142565505889
+    b5 = 0.3322195591068374
+
+    A = [
+        0 0 0 0 0
+        a21 0 0 0 0
+        a31 a32 0 0 0
+        a41 a42 a43 0 0
+        a51 a52 a53 a54 0
+    ]
+    c = [0, c2, c3, c4, c5]
+    α = [b1, b2, b3, b4, b5]
+    A = map(T, A)
+    α = map(T, α)
+    c = map(T, c)
+    return (DiffEqBase.ExplicitRKTableau(A, c, α, 4))
+end
+
 function constructRKMK4(T::Type = Float64)
     A = [
         0 0 0 0
@@ -181,12 +217,16 @@ end
     test_solver_frozen(manifold_to_alg_cg2; expected_order = 2)
     compare_with_diffeq_frozen(manifold_to_alg_cg2, constructCG2())
 
-    manifold_to_alg_cg23 = M -> ManifoldDiffEq.CG23(M, ExponentialRetraction())
+    manifold_to_alg_cg23 = M -> ManifoldDiffEq.CG2_3(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg23; expected_order = 2, adaptive = true)
 
     manifold_to_alg_cg3 = M -> ManifoldDiffEq.CG3(M, ExponentialRetraction())
     test_solver_frozen(manifold_to_alg_cg3; expected_order = 3)
     compare_with_diffeq_frozen(manifold_to_alg_cg3, constructCG3())
+
+    manifold_to_alg_cg4a = M -> ManifoldDiffEq.CG4a(M, ExponentialRetraction())
+    test_solver_frozen(manifold_to_alg_cg4a; expected_order = 4)
+    compare_with_diffeq_frozen(manifold_to_alg_cg4a, constructCG4a())
 
     manifold_to_alg_lie_euler =
         (M, action) -> ManifoldDiffEq.ManifoldLieEuler(M, ExponentialRetraction(), action)

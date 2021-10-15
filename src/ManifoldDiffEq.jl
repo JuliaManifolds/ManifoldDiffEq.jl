@@ -1,5 +1,6 @@
 module ManifoldDiffEq
 
+using ManifoldsBase
 using Manifolds
 using SciMLBase:
     SciMLBase, AbstractODEProblem, AbstractODEFunction, NullParameters, promote_tspan
