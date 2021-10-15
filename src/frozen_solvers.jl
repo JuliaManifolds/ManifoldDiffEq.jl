@@ -500,7 +500,7 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
     b3 = Tdt(0.7397813985370780) * dt
     b4 = Tdt(-0.1907142565505889) * dt
     b5 = Tdt(0.3322195591068374) * dt
-    
+
     retract!(M, cache.X2u, u, cache.X1 * a21h, alg.retraction_method)
     f(cache.X2, cache.X2u, p, t + c2h)
 
@@ -510,18 +510,58 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
     f(cache.X3, cache.X3u, p, t + c3h)
 
     retract!(M, cache.X4u, u, a41h * cache.X1)
-    k2tk4u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X4u, p, t + c2h, t + c4h)
+    k2tk4u = f.f.operator_vector_transport(
+        M,
+        cache.X2u,
+        cache.X2,
+        cache.X4u,
+        p,
+        t + c2h,
+        t + c4h,
+    )
     retract!(M, cache.X4u, cache.X4u, a42h * k2tk4u)
-    k3tk4u = f.f.operator_vector_transport(M, cache.X3u, cache.X3, cache.X4u, p, t + c3h, t + c4h)
+    k3tk4u = f.f.operator_vector_transport(
+        M,
+        cache.X3u,
+        cache.X3,
+        cache.X4u,
+        p,
+        t + c3h,
+        t + c4h,
+    )
     retract!(M, cache.X4u, cache.X4u, a43h * k3tk4u)
     f(cache.X4, cache.X4u, p, t + c4h)
 
     retract!(M, cache.X5u, u, a51h * cache.X1)
-    k2tk5u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X5u, p, t + c2h, t + c5h)
+    k2tk5u = f.f.operator_vector_transport(
+        M,
+        cache.X2u,
+        cache.X2,
+        cache.X5u,
+        p,
+        t + c2h,
+        t + c5h,
+    )
     retract!(M, cache.X5u, cache.X5u, a52h * k2tk5u)
-    k3tk5u = f.f.operator_vector_transport(M, cache.X3u, cache.X3, cache.X5u, p, t + c3h, t + c5h)
+    k3tk5u = f.f.operator_vector_transport(
+        M,
+        cache.X3u,
+        cache.X3,
+        cache.X5u,
+        p,
+        t + c3h,
+        t + c5h,
+    )
     retract!(M, cache.X5u, cache.X5u, a53h * k3tk5u)
-    k4tk5u = f.f.operator_vector_transport(M, cache.X4u, cache.X4, cache.X5u, p, t + c4h, t + c5h)
+    k4tk5u = f.f.operator_vector_transport(
+        M,
+        cache.X4u,
+        cache.X4,
+        cache.X5u,
+        p,
+        t + c4h,
+        t + c5h,
+    )
     retract!(M, cache.X5u, cache.X5u, a54h * k4tk5u)
     f(cache.X5, cache.X5u, p, t + c5h)
 
@@ -550,4 +590,3 @@ function initialize!(integrator, ::CG4aCache)
     integrator.k[2] = integrator.fsallast
     return nothing
 end
-
