@@ -31,7 +31,9 @@ end
 """
     reltol_norm(M::AbstractManifold, u)
 
-Norm-like thing for relative tolerance.
+Estimate the fraction `d_{min}/eps(number_eltype(u))` where `d_{min}`` is the distance
+between `u`, a point on `M`, and the nearest distinct point on `M` representable in the
+representation of `u`.
 """
 function reltol_norm(M::AbstractManifold, u)
     return norm(u)
