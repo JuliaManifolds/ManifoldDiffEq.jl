@@ -31,14 +31,14 @@ end
 """
     reltol_norm(M::AbstractManifold, u)
 
-Estimate the fraction `d_{min}/eps(number_eltype(u))` where `d_{min}`` is the distance
+Estimate the fraction `d_{min}/eps(number_eltype(u))` where `d_{min}` is the distance
 between `u`, a point on `M`, and the nearest distinct point on `M` representable in the
 representation of `u`.
 """
-function reltol_norm(M::AbstractManifold, u)
+function reltol_norm(::AbstractManifold, u)
     return norm(u)
 end
 function reltol_norm(M::ProductManifold, u::ProductRepr)
     mapped_norms = map((Mi, ui) -> reltol_norm(Mi, ui), M.manifolds, u.parts)
-    return maximum(mapped_norms)
+    return mean(mapped_norms)
 end
