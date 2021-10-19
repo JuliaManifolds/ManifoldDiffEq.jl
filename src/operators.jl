@@ -34,7 +34,7 @@ end
 """
     FrozenManifoldDiffEqOperator{T<:Number,TM<:AbstractManifold,TF,TVT} <: SciMLBase.AbstractDiffEqOperator{T}
 
-DiffEq operator on manifolds in the frozen vector field formulation
+DiffEq operator on manifolds in the frozen vector field formulation.
 """
 struct FrozenManifoldDiffEqOperator{T<:Number,TF,TVT<:AbstractVectorTransportOperator} <:
        SciMLBase.AbstractDiffEqOperator{T}

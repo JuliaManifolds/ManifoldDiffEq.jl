@@ -1,5 +1,6 @@
 module ManifoldDiffEq
 
+using ManifoldsBase
 using Manifolds
 using SciMLBase:
     SciMLBase, AbstractODEProblem, AbstractODEFunction, NullParameters, promote_tspan
@@ -9,6 +10,7 @@ using OrdinaryDiffEq
 using OrdinaryDiffEq:
     InterpolationData,
     OrdinaryDiffEqAlgorithm,
+    OrdinaryDiffEqAdaptiveAlgorithm,
     OrdinaryDiffEqMutableCache,
     OrdinaryDiffEqConstantCache,
     trivial_limiter!,
@@ -23,6 +25,7 @@ import OrdinaryDiffEq: alg_cache, alg_order, initialize!, perform_step!
 using RecursiveArrayTools
 
 include("utils.jl")
+include("error_estimation.jl")
 include("operators.jl")
 include("problems.jl")
 include("interpolation.jl")

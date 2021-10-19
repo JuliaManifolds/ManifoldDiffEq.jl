@@ -187,6 +187,21 @@ function ManifoldODEProblem(
     return ManifoldODEProblem(convert(ODEFunction, f), u0, tspan, manifold, p; kwargs...)
 end
 
+function OrdinaryDiffEq.ode_determine_initdt(
+    u0,
+    t,
+    tdir,
+    dtmax,
+    abstol,
+    reltol,
+    internalnorm,
+    prob::ManifoldODEProblem{uType,tType},
+    integrator,
+) where {tType,uType}
+    _tType = number_eltype(tType)
+    oneunit_tType = oneunit(_tType)
+    return convert(_tType, oneunit_tType * 1 // 10^(6))
+end
 
 function build_solution(
     prob::ManifoldODEProblem,

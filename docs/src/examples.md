@@ -57,7 +57,7 @@ arr = GLMakie.arrows!(
            vec(x), vec(y), vec(z), u, v, w;
            arrowsize = 0.02, linecolor = (:gray, 0.7), linewidth = 0.0075, lengthscale = 0.1
 )
-save("docs/src/assets/img/first_example_vector_field.png",f)
+save("docs/src/assets/img/first_example_vector_field.png", f)
 ```
 which looks like
 
@@ -65,7 +65,7 @@ which looks like
 
 Let's set up the manifold, the [sphere](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) and two different types of problems/solvers
 A first one that uses the Lie group action of the [Special orthogonal group](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-orthogonal-group)
-acting on data with 2 solvers and direct solvers on the sphere, using 3 other solversusing the idea of frozen coefficients.
+acting on data with 2 solvers and direct solvers on the sphere, using 3 other solvers using the idea of frozen coefficients.
 
 ```julia
 S2 = Manifolds.Sphere(2)
@@ -75,12 +75,12 @@ tspan = (0, 20.0)
 A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
     return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
 end
-prob_lie = ODEProblem(A_lie, u0, tspan)
+prob_lie = ManifoldDiffEq.ManifoldODEProblem(A_lie, u0, tspan, S2)
 
 A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
     return f2(u...)
 end
-prob_frozen = ODEProblem(A_frozen, u0, tspan)
+prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A_frozen, u0, tspan, S2)
 
 action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
 alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)
@@ -88,6 +88,7 @@ alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(S2, ExponentialRetraction(), action)
 
 alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
+alg_cg23 = ManifoldDiffEq.CG2_3(S2, ExponentialRetraction())
 alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
 
 dt = 0.1
@@ -96,22 +97,26 @@ sol_rkmk4 = solve(prob_lie, alg_lie_rkmk4, dt = dt)
 
 sol_frozen = solve(prob_frozen, alg_manifold_euler, dt=dt)
 sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
+sol_frozen_cg23 = solve(prob_frozen, alg_cg23)
 sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
 
-plot_sol(sol,col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 2, color=col)
+plot_sol(sol, col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 2, color=col)
 
 l1 = plot_sol(sol_lie, colorant"#999933")
 l2 = plot_sol(sol_rkmk4, colorant"#DDCC77")
 l3 = plot_sol(sol_frozen, colorant"#332288")
-l4 = plot_sol(sol_frozen_cg2, colorant"#88CCEE")
-l5 = plot_sol(sol_frozen_cg3, colorant"#44AA99")
+l4 = plot_sol(sol_frozen_cg2, colorant"#CCEE88")
+l5 = plot_sol(sol_frozen_cg23, colorant"#88CCEE")
+l6 = plot_sol(sol_frozen_cg3, colorant"#44AA99")
 Legend(f[1, 2],
-    [l1, l2, l3, l4, l5],
-    ["Lie Euler", "RKMK4", "Euler", "CG2", "CG3"]
+    [l1, l2, l3, l4, l5, l6],
+    ["Lie Euler", "RKMK4", "Euler", "CG2", "CG2(3)", "CG3"]
 )
-save("docs/src/assets/img/first_example_solutions.png",f)
+save("docs/src/assets/img/first_example_solutions.png", f)
 ```
 
 And the solutions look like
 
 ![The ODE solutions](assets/img/first_example_solutions.png)
+
+Note that `alg_cg23` uses adaptive time stepping.

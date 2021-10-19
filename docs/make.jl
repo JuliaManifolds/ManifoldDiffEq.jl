@@ -11,6 +11,7 @@ makedocs(
         "Home" => "index.md",
         "Lie group action solvers" => "lie_group_solvers.md",
         "Frozen coefficients solvers" => "frozen_coefficients.md",
+        "Error estimation" => "error_estimation.md",
         "Notation" => "notation.md",
         "Examples" => "examples.md",
     ],
