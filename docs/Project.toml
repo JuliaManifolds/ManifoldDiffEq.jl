@@ -8,6 +8,6 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Documenter = "0.27"
-ManifoldsBase = "0.12"
-Manifolds = "0.6"
+ManifoldsBase = "0.13"
+Manifolds = "0.8"
 Plots = "= 1.10.5"
