@@ -1,39 +1,4 @@
 
-
-
-@doc raw"""
-    apply_diff_group(A::AbstractGroupAction, a, X, p)
-
-For a point on manifold ``p ∈ \mathcal M`` and an element `X` of the tangent space at `a`,
-an element of the Lie group of action `A`, ``X ∈ T_a \mathcal G``, compute the
-differential of action of `a` on `p` for vector `X`, as specified by rule `A`.
-When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
-convention, the differential transforms vectors
-
-````math
-(\mathrm{d}τ^p) : T_{a} \mathcal G → T_{τ_a p} \mathcal M
-````
-"""
-apply_diff_group(A::AbstractGroupAction, a, X, p)
-
-function apply_diff_group(
-    ::Manifolds.RotationActionOnVector{N,F,LeftAction},
-    ::Identity,
-    X,
-    p,
-) where {N,F}
-    return X * p
-end
-
-function apply_diff_group(
-    ::Manifolds.TranslationAction{N,F,LeftAction},
-    ::Identity,
-    X,
-    p,
-) where {N,F}
-    return X
-end
-
 """
     ManifoldLieEuler
 
