@@ -170,10 +170,10 @@ The Butcher tableau reads (see tableau (5) of [^EngøMarthinsen1998]):
 ```
 The last row is used for error estimation.
 
-[^EngøMarthinsen1998]: 
+[^EngøMarthinsen1998]:
     > K. Engø and A. Marthinsen, “Modeling and Solution of Some Mechanical Problems on Lie
     > Groups,” Multibody System Dynamics, vol. 2, no. 1, pp. 71–88, Mar. 1998,
-    > doi: 10.1023/A:1009701220769.
+    > doi: [10.1023/A:1009701220769](https://doi.org/10.1023/A:1009701220769).
 """
 struct CG2_3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
        OrdinaryDiffEqAdaptiveAlgorithm
@@ -417,7 +417,7 @@ Example 1 of [^JackiewiczMarthinsenOwren2000].
 [^JackiewiczMarthinsenOwren2000]:
     > Z. Jackiewicz, A. Marthinsen, and B. Owren, “Construction of Runge–Kutta methods of
     > Crouch–Grossman type of high order,” Advances in Computational Mathematics, vol. 13,
-    > no. 4, pp. 405–415, Dec. 2000, doi: 10.1023/A:1016645730465.
+    > no. 4, pp. 405–415, Dec. 2000, doi: [10.1023/A:1016645730465](https://doi.org/10.1023/A:1016645730465).
 """
 struct CG4a{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
     manifold::TM

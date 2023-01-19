@@ -85,7 +85,7 @@ end
 
 The Lie group variant of fourth-order Runge-Kutta algorithm for problems in the
 [`LieODEProblemType`](@ref) formulation, called Runge-Kutta Munthe-Kaas.
-The Nutcher tableau is:
+The Butcher tableau is:
 
 ```math
 \begin{array}{c|cccc}
