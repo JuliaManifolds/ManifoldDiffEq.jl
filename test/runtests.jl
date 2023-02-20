@@ -32,9 +32,9 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
     @testset "Product manifold" begin
         M = ProductManifold(Sphere(2), Euclidean(3))
         A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
-            return ProductRepr(cross(u.parts[1], [1.0, 0.0, 0.0]), u.parts[2])
+            return ArrayPartition(cross(u.parts[1], [1.0, 0.0, 0.0]), u.parts[2])
         end
-        u0 = ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
+        u0 = ArrayPartition([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
         alg = manifold_to_alg(M)
         prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = if adaptive

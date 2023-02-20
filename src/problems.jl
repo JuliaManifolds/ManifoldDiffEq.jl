@@ -184,7 +184,7 @@ function ManifoldODEProblem(
     p = NullParameters();
     kwargs...,
 )
-    return ManifoldODEProblem(convert(ODEFunction, f), u0, tspan, manifold, p; kwargs...)
+    return ManifoldODEProblem(ODEFunction(f), u0, tspan, manifold, p; kwargs...)
 end
 
 function OrdinaryDiffEq.ode_determine_initdt(
