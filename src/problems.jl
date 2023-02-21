@@ -184,7 +184,7 @@ function ManifoldODEProblem(
     p = NullParameters();
     kwargs...,
 )
-    return ManifoldODEProblem(convert(ODEFunction, f), u0, tspan, manifold, p; kwargs...)
+    return ManifoldODEProblem(ODEFunction(f), u0, tspan, manifold, p; kwargs...)
 end
 
 function OrdinaryDiffEq.ode_determine_initdt(
@@ -229,19 +229,7 @@ function build_solution(
         interp.cache,
         prob.manifold,
     )
-    return ODESolution{
-        T,
-        1,
-        typeof(u),
-        Nothing,
-        Nothing,
-        typeof(t),
-        typeof(k),
-        typeof(prob),
-        typeof(alg),
-        typeof(manifold_interp),
-        typeof(destats),
-    }(
+    return ODESolution{T,1}(
         u,
         nothing,
         nothing,
@@ -253,6 +241,7 @@ function build_solution(
         dense,
         0,
         destats,
+        nothing,
         retcode,
     )
 end
