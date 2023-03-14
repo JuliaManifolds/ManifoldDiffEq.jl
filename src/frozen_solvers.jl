@@ -53,12 +53,12 @@ function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
     k = f(u, p, t)
     retract!(alg.manifold, u, u, dt * k, alg.retraction_method)
 
-    return integrator.destats.nf += 1
+    return integrator.stats.nf += 1
 end
 
 function initialize!(integrator, ::ManifoldEulerCache)
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t) # Pre-start fsal
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
@@ -127,7 +127,7 @@ function initialize!(integrator, cache::CG2Cache)
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
 
     integrator.fsallast = zero.(integrator.fsalfirst)
     integrator.k[1] = integrator.fsalfirst
@@ -146,7 +146,7 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
     k2t = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + dt2, t)
     retract!(M, u, u, dt * k2t, alg.retraction_method)
 
-    return integrator.destats.nf += 2
+    return integrator.stats.nf += 2
 end
 
 
@@ -229,7 +229,7 @@ function initialize!(integrator, cache::CG2_3Cache)
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
 
     integrator.fsallast = zero.(integrator.fsalfirst)
     integrator.k[1] = integrator.fsalfirst
@@ -289,7 +289,7 @@ function perform_step!(integrator, cache::CG2_3Cache, repeat_step = false)
         )
     end
 
-    return integrator.destats.nf += 3
+    return integrator.stats.nf += 3
 end
 
 
@@ -389,7 +389,7 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, u, p, t + c3h, t)
     retract!(M, u, u, b3 * X3tu, alg.retraction_method)
 
-    return integrator.destats.nf += 3
+    return integrator.stats.nf += 3
 end
 
 function initialize!(integrator, ::CG3Cache)
@@ -397,7 +397,7 @@ function initialize!(integrator, ::CG3Cache)
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
 
     integrator.fsallast = zero.(integrator.fsalfirst)
     integrator.k[1] = integrator.fsalfirst
@@ -575,7 +575,7 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
     X5tu = f.f.operator_vector_transport(M, cache.X5u, cache.X5, u, p, t + c5h, t)
     retract!(M, u, u, b5 * X5tu, alg.retraction_method)
 
-    return integrator.destats.nf += 5
+    return integrator.stats.nf += 5
 end
 
 function initialize!(integrator, ::CG4aCache)
@@ -583,7 +583,7 @@ function initialize!(integrator, ::CG4aCache)
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
     integrator.fsalfirst = integrator.f(integrator.uprev, integrator.p, integrator.t)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
 
     integrator.fsallast = zero.(integrator.fsalfirst)
     integrator.k[1] = integrator.fsalfirst

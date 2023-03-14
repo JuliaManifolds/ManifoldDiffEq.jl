@@ -62,14 +62,14 @@ function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = f
 
     retract!(alg.manifold, u, u, dt * k, alg.retraction_method)
 
-    return integrator.destats.nf += 1
+    return integrator.stats.nf += 1
 end
 
 function initialize!(integrator, cache::ManifoldLieEulerCache)
     @unpack t, uprev, f, p, alg = integrator
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst = apply_diff_group(alg.action, cache.id, X, uprev)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
@@ -188,14 +188,14 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     X = apply_diff_group(action, cache.id, v, u)
     retract!(alg.manifold, u, u, X, alg.retraction_method)
 
-    return integrator.destats.nf += 1
+    return integrator.stats.nf += 1
 end
 
 function initialize!(integrator, cache::RKMK4Cache)
     @unpack t, uprev, f, p, alg = integrator
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst = apply_diff_group(alg.action, cache.id, X, uprev)
-    integrator.destats.nf += 1
+    integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
 
