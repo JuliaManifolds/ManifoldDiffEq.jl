@@ -214,8 +214,8 @@ function build_solution(
     calculate_error = true,
     k = nothing,
     interp::InterpolationData,
-    retcode = :Default,
-    destats = nothing,
+    retcode = ReturnCode.Default,
+    stats = nothing,
     kwargs...,
 )
     T = eltype(eltype(u))
@@ -240,7 +240,7 @@ function build_solution(
         manifold_interp,
         dense,
         0,
-        destats,
+        stats,
         nothing,
         retcode,
     )
