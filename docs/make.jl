@@ -1,4 +1,4 @@
-using Plots, Manifolds, ManifoldsBase, ManifoldDiffEq, Documenter, PyPlot
+using Plots, Manifolds, ManifoldsBase, ManifoldDiffEq, Documenter, PythonPlot
 ENV["GKSwstype"] = "100"
 
 makedocs(
