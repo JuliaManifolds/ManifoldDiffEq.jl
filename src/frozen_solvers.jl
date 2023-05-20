@@ -51,7 +51,7 @@ function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
 
     k = f(u, p, t)
-    retract!(alg.manifold, u, u, dt * k, alg.retraction_method)
+    retract!(alg.manifold, u, u, k, dt, alg.retraction_method)
 
     return integrator.stats.nf += 1
 end
@@ -141,10 +141,10 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
     M = alg.manifold
     f(cache.X1, u, p, t)
     dt2 = dt / 2
-    retract!(M, cache.X2u, u, cache.X1 * dt2, alg.retraction_method)
+    retract!(M, cache.X2u, u, cache.X1, dt2, alg.retraction_method)
     f(cache.X2, cache.X2u, p, t + dt2)
     k2t = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + dt2, t)
-    retract!(M, u, u, dt * k2t, alg.retraction_method)
+    retract!(M, u, u, k2t, dt, alg.retraction_method)
 
     return integrator.stats.nf += 2
 end
@@ -253,29 +253,29 @@ function perform_step!(integrator, cache::CG2_3Cache, repeat_step = false)
     b1hat = (13 // 51) * dt
     b2hat = (-2 // 3) * dt
     b3hat = (24 // 17) * dt
-    retract!(M, cache.X2u, u, cache.X1 * a21h, alg.retraction_method)
+    retract!(M, cache.X2u, u, cache.X1, a21h, alg.retraction_method)
     f(cache.X2, cache.X2u, p, t + c2h)
-    retract!(M, cache.X3u, u, a31h * cache.X1)
+    retract!(M, cache.X3u, u, cache.X1, a31h)
     k2tk3u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X3u, p, t, t + c2h)
-    retract!(M, cache.X3u, cache.X3u, a32h * k2tk3u)
+    retract!(M, cache.X3u, cache.X3u, k2tk3u, a32h)
     f(cache.X3, cache.X3u, p, t + c3h)
     if integrator.opts.adaptive
         copyto!(M, cache.uhat, u)
     end
 
-    retract!(M, u, u, b1 * cache.X1, alg.retraction_method)
+    retract!(M, u, u, cache.X1, b1, alg.retraction_method)
     X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + c2h, t)
-    retract!(M, u, u, b2 * X2tu, alg.retraction_method)
+    retract!(M, u, u, X2tu, b2, alg.retraction_method)
     X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, u, p, t + c3h, t)
-    retract!(M, u, u, b3 * X3tu, alg.retraction_method)
+    retract!(M, u, u, X3tu, b3, alg.retraction_method)
 
     if integrator.opts.adaptive
         uhat = cache.uhat
-        retract!(M, uhat, uhat, b1hat * cache.X1, alg.retraction_method)
+        retract!(M, uhat, uhat, cache.X1, b1hat, alg.retraction_method)
         X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, uhat, p, t + c2h, t)
-        retract!(M, uhat, uhat, b2hat * X2tu, alg.retraction_method)
+        retract!(M, uhat, uhat, X2tu, b2hat, alg.retraction_method)
         X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, uhat, p, t + c3h, t)
-        retract!(M, uhat, uhat, b3hat * X3tu, alg.retraction_method)
+        retract!(M, uhat, uhat, X3tu, b3hat, alg.retraction_method)
 
         integrator.EEst = calculate_eest(
             M,
@@ -376,18 +376,18 @@ function perform_step!(integrator, cache::CG3Cache, repeat_step = false)
     b1 = (13 // 51) * dt
     b2 = (-2 // 3) * dt
     b3 = (24 // 17) * dt
-    retract!(M, cache.X2u, u, cache.X1 * a21h, alg.retraction_method)
+    retract!(M, cache.X2u, u, cache.X1, a21h, alg.retraction_method)
     f(cache.X2, cache.X2u, p, t + c2h)
-    retract!(M, cache.X3u, u, a31h * cache.X1)
+    retract!(M, cache.X3u, u, cache.X1, a31h)
     k2tk3u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X3u, p, t, t + c2h)
-    retract!(M, cache.X3u, cache.X3u, a32h * k2tk3u)
+    retract!(M, cache.X3u, cache.X3u, k2tk3u, a32h)
     f(cache.X3, cache.X3u, p, t + c3h)
 
-    retract!(M, u, u, b1 * cache.X1, alg.retraction_method)
+    retract!(M, u, u, cache.X1, b1, alg.retraction_method)
     X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + c2h, t)
-    retract!(M, u, u, b2 * X2tu, alg.retraction_method)
+    retract!(M, u, u, X2tu, b2, alg.retraction_method)
     X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, u, p, t + c3h, t)
-    retract!(M, u, u, b3 * X3tu, alg.retraction_method)
+    retract!(M, u, u, X3tu, b3, alg.retraction_method)
 
     return integrator.stats.nf += 3
 end
@@ -501,15 +501,15 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
     b4 = Tdt(-0.1907142565505889) * dt
     b5 = Tdt(0.3322195591068374) * dt
 
-    retract!(M, cache.X2u, u, cache.X1 * a21h, alg.retraction_method)
+    retract!(M, cache.X2u, u, cache.X1, a21h, alg.retraction_method)
     f(cache.X2, cache.X2u, p, t + c2h)
 
-    retract!(M, cache.X3u, u, a31h * cache.X1)
+    retract!(M, cache.X3u, u, cache.X1, a31h)
     k2tk3u = f.f.operator_vector_transport(M, cache.X2u, cache.X2, cache.X3u, p, t, t + c2h)
-    retract!(M, cache.X3u, cache.X3u, a32h * k2tk3u)
+    retract!(M, cache.X3u, cache.X3u, k2tk3u, a32h)
     f(cache.X3, cache.X3u, p, t + c3h)
 
-    retract!(M, cache.X4u, u, a41h * cache.X1)
+    retract!(M, cache.X4u, u, cache.X1, a41h)
     k2tk4u = f.f.operator_vector_transport(
         M,
         cache.X2u,
@@ -519,7 +519,7 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
         t + c2h,
         t + c4h,
     )
-    retract!(M, cache.X4u, cache.X4u, a42h * k2tk4u)
+    retract!(M, cache.X4u, cache.X4u, k2tk4u, a42h)
     k3tk4u = f.f.operator_vector_transport(
         M,
         cache.X3u,
@@ -529,10 +529,10 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
         t + c3h,
         t + c4h,
     )
-    retract!(M, cache.X4u, cache.X4u, a43h * k3tk4u)
+    retract!(M, cache.X4u, cache.X4u, k3tk4u, a43h)
     f(cache.X4, cache.X4u, p, t + c4h)
 
-    retract!(M, cache.X5u, u, a51h * cache.X1)
+    retract!(M, cache.X5u, u, cache.X1, a51h)
     k2tk5u = f.f.operator_vector_transport(
         M,
         cache.X2u,
@@ -542,7 +542,7 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
         t + c2h,
         t + c5h,
     )
-    retract!(M, cache.X5u, cache.X5u, a52h * k2tk5u)
+    retract!(M, cache.X5u, cache.X5u, k2tk5u, a52h)
     k3tk5u = f.f.operator_vector_transport(
         M,
         cache.X3u,
@@ -552,7 +552,7 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
         t + c3h,
         t + c5h,
     )
-    retract!(M, cache.X5u, cache.X5u, a53h * k3tk5u)
+    retract!(M, cache.X5u, cache.X5u, k3tk5u, a53h)
     k4tk5u = f.f.operator_vector_transport(
         M,
         cache.X4u,
@@ -562,18 +562,18 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
         t + c4h,
         t + c5h,
     )
-    retract!(M, cache.X5u, cache.X5u, a54h * k4tk5u)
+    retract!(M, cache.X5u, cache.X5u, k4tk5u, a54h)
     f(cache.X5, cache.X5u, p, t + c5h)
 
-    retract!(M, u, u, b1 * cache.X1, alg.retraction_method)
+    retract!(M, u, u, cache.X1, b1, alg.retraction_method)
     X2tu = f.f.operator_vector_transport(M, cache.X2u, cache.X2, u, p, t + c2h, t)
-    retract!(M, u, u, b2 * X2tu, alg.retraction_method)
+    retract!(M, u, u, X2tu, b2, alg.retraction_method)
     X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, u, p, t + c3h, t)
-    retract!(M, u, u, b3 * X3tu, alg.retraction_method)
+    retract!(M, u, u, X3tu, b3, alg.retraction_method)
     X4tu = f.f.operator_vector_transport(M, cache.X4u, cache.X4, u, p, t + c4h, t)
-    retract!(M, u, u, b4 * X4tu, alg.retraction_method)
+    retract!(M, u, u, X4tu, b4, alg.retraction_method)
     X5tu = f.f.operator_vector_transport(M, cache.X5u, cache.X5, u, p, t + c5h, t)
-    retract!(M, u, u, b5 * X5tu, alg.retraction_method)
+    retract!(M, u, u, X5tu, b5, alg.retraction_method)
 
     return integrator.stats.nf += 5
 end
