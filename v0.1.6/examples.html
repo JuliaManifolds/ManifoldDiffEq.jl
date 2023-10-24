@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · ManifoldDiffEq.jl</title><meta name="title" content="Examples · ManifoldDiffEq.jl"/><meta property="og:title" content="Examples · ManifoldDiffEq.jl"/><meta property="twitter:title" content="Examples · ManifoldDiffEq.jl"/><meta name="description" content="Documentation for ManifoldDiffEq.jl."/><meta property="og:description" content="Documentation for ManifoldDiffEq.jl."/><meta property="twitter:description" content="Documentation for ManifoldDiffEq.jl."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script><link href="assets/favicon.ico" rel="icon" type="image/x-icon"/><link href="assets/citations.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="index.html"><img class="docs-light-only" src="assets/logo.png" alt="ManifoldDiffEq.jl logo"/><img class="docs-dark-only" src="assets/logo-dark.png" alt="ManifoldDiffEq.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">ManifoldDiffEq.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li><a class="tocitem" href="lie_group_solvers.html">Lie group action solvers</a></li><li><a class="tocitem" href="frozen_coefficients.html">Frozen coefficients solvers</a></li><li><a class="tocitem" href="error_estimation.html">Error estimation</a></li><li><a class="tocitem" href="notation.html">Notation</a></li><li class="is-active"><a class="tocitem" href="examples.html">Examples</a></li><li><a class="tocitem" href="references.html">References</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="examples.html">Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="examples.html">Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaManifolds/ManifoldDiffEq.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaManifolds/ManifoldDiffEq.jl/blob/main/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><p>We take a look at the simple example from</p><p>In the following code an ODE on a sphere is solved the introductionary example from the <a href="https://www.unige.ch/~hairer/poly-sde-mani.pdf">lecture notes</a> by <a href="http://www.unige.ch/~hairer/">E. Hairer</a>.</p><p>We solve the ODE system on the sphere <span>$\mathbb S^2$</span> given by</p><p class="math-container">\[\begin{pmatrix}
+    \dot x \\
+    \dot y \\
+    \dot z
+\end{pmatrix}
+=
+\begin{pmatrix}
+    0 &amp; z/I_3 &amp; -y/I_2 \\
+    -z/I_3 &amp; 0 &amp; x/I_1 \\
+    y/I_2&amp; -x/I_1 &amp; 0
+\end{pmatrix}
+\begin{pmatrix}
+    x \\
+    y \\
+    z
+\end{pmatrix}\]</p><pre><code class="language-julia hljs">using ManifoldDiffEq, OrdinaryDiffEq, Manifolds
+using GLMakie, LinearAlgebra, Colors
+
+n = 25
+
+θ = [0;(0.5:n-0.5)/n;1]
+φ = [(0:2n-2)*2/(2n-1);2]
+x = [cospi(φ)*sinpi(θ) for θ in θ, φ in φ]
+y = [sinpi(φ)*sinpi(θ) for θ in θ, φ in φ]
+z = [cospi(θ) for θ in θ, φ in φ]
+
+function f2(x, y, z)
+    Iv = [1.6, 1.0, 2/3]
+    p = [x, y, z]
+    A = [0 -z y; z 0 -x; -y x 0]
+    return A * (p./Iv)
+end
+
+tans = f2.(vec(x), vec(y), vec(z))
+u = [a[1] for a in tans]
+v = [a[2] for a in tans]
+w = [a[3] for a in tans]
+
+f = Figure();
+Axis3(f[1,1])
+
+arr = GLMakie.arrows!(
+           vec(x), vec(y), vec(z), u, v, w;
+           arrowsize = 0.02, linecolor = (:gray, 0.7), linewidth = 0.0075, lengthscale = 0.1
+)
+save(&quot;docs/src/assets/img/first_example_vector_field.png&quot;, f)</code></pre><p>which looks like</p><p><img src="assets/img/first_example_vector_field.png" alt="The ODE illustrated as a tangent vector field"/></p><p>Let&#39;s set up the manifold, the <a href="https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html">sphere</a> and two different types of problems/solvers A first one that uses the Lie group action of the <a href="https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Special-orthogonal-group">Special orthogonal group</a> acting on data with 2 solvers and direct solvers on the sphere, using 3 other solvers using the idea of frozen coefficients.</p><pre><code class="language-julia hljs">S2 = Manifolds.Sphere(2)
+u0 = [0.0, sqrt(9/10), sqrt(1/10)]
+tspan = (0, 20.0)
+
+A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
+    return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
+end
+prob_lie = ManifoldDiffEq.ManifoldODEProblem(A_lie, u0, tspan, S2)
+
+A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+    return f2(u...)
+end
+prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A_frozen, u0, tspan, S2)
+
+action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
+alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)
+alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(S2, ExponentialRetraction(), action)
+
+alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
+alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
+alg_cg23 = ManifoldDiffEq.CG2_3(S2, ExponentialRetraction())
+alg_cg3 = ManifoldDiffEq.CG3(S2, ExponentialRetraction())
+
+dt = 0.1
+sol_lie = solve(prob_lie, alg_lie_euler, dt = dt)
+sol_rkmk4 = solve(prob_lie, alg_lie_rkmk4, dt = dt)
+
+sol_frozen = solve(prob_frozen, alg_manifold_euler, dt=dt)
+sol_frozen_cg2 = solve(prob_frozen, alg_cg2, dt = dt)
+sol_frozen_cg23 = solve(prob_frozen, alg_cg23)
+sol_frozen_cg3 = solve(prob_frozen, alg_cg3, dt = dt)
+
+plot_sol(sol, col) = GLMakie.lines!([u[1] for u in sol.u], [u[2] for u in sol.u], [u[3] for u in sol.u]; linewidth = 2, color=col)
+
+l1 = plot_sol(sol_lie, colorant&quot;#999933&quot;)
+l2 = plot_sol(sol_rkmk4, colorant&quot;#DDCC77&quot;)
+l3 = plot_sol(sol_frozen, colorant&quot;#332288&quot;)
+l4 = plot_sol(sol_frozen_cg2, colorant&quot;#CCEE88&quot;)
+l5 = plot_sol(sol_frozen_cg23, colorant&quot;#88CCEE&quot;)
+l6 = plot_sol(sol_frozen_cg3, colorant&quot;#44AA99&quot;)
+Legend(f[1, 2],
+    [l1, l2, l3, l4, l5, l6],
+    [&quot;Lie Euler&quot;, &quot;RKMK4&quot;, &quot;Euler&quot;, &quot;CG2&quot;, &quot;CG2(3)&quot;, &quot;CG3&quot;]
+)
+save(&quot;docs/src/assets/img/first_example_solutions.png&quot;, f)</code></pre><p>And the solutions look like</p><p><img src="assets/img/first_example_solutions.png" alt="The ODE solutions"/></p><p>Note that <code>alg_cg23</code> uses adaptive time stepping.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="notation.html">« Notation</a><a class="docs-footer-nextpage" href="references.html">References »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.1.2 on <span class="colophon-date" title="Tuesday 24 October 2023 13:34">Tuesday 24 October 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
