@@ -99,13 +99,7 @@ The Butcher tableau is:
 \end{array}
 ```
 
-For more details see [^MuntheKaasOwren1999].
-
-[^MuntheKaasOwren1999]:
-    > H. Munthe–Kaas and B. Owren, “Computations in a free Lie algebra,” Philosophical
-    > Transactions of the Royal Society of London. Series A: Mathematical, Physical and
-    > Engineering Sciences, vol. 357, no. 1754, pp. 957–981, Apr. 1999,
-    > doi: [10.1098/rsta.1999.0361](https://doi.org/10.1098/rsta.1999.0361).
+For more details see [MuntheKaasOwren:1999](@cite).
 """
 struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
        OrdinaryDiffEqAlgorithm

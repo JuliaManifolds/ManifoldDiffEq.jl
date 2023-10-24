@@ -38,7 +38,7 @@ representation of `u`.
 function reltol_norm(::AbstractManifold, u)
     return norm(u)
 end
-function reltol_norm(M::ProductManifold, u::ProductRepr)
-    mapped_norms = map((Mi, ui) -> reltol_norm(Mi, ui), M.manifolds, u.parts)
+function reltol_norm(M::ProductManifold, u::ArrayPartition)
+    mapped_norms = map((Mi, ui) -> reltol_norm(Mi, ui), M.manifolds, u.x)
     return mean(mapped_norms)
 end
