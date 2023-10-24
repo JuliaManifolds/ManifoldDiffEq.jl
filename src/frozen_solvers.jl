@@ -156,7 +156,7 @@ end
 
 A Crouch-Grossmann algorithm of order 2(3) for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation.
-The Butcher tableau reads (see tableau (5) of [^EngøMarthinsen1998]):
+The Butcher tableau reads (see tableau (5) of [EngøMarthinsen:1998](@cite)):
 
 ```math
 \begin{array}{c|ccc}
@@ -169,11 +169,6 @@ The Butcher tableau reads (see tableau (5) of [^EngøMarthinsen1998]):
 \end{array}
 ```
 The last row is used for error estimation.
-
-[^EngøMarthinsen1998]:
-    > K. Engø and A. Marthinsen, “Modeling and Solution of Some Mechanical Problems on Lie
-    > Groups,” Multibody System Dynamics, vol. 2, no. 1, pp. 71–88, Mar. 1998,
-    > doi: [10.1023/A:1009701220769](https://doi.org/10.1023/A:1009701220769).
 """
 struct CG2_3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
        OrdinaryDiffEqAdaptiveAlgorithm
@@ -298,7 +293,7 @@ end
     CG3
 
 A Crouch-Grossmann algorithm of second order for problems in the
-[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [^OwrenMarthinsen1999]:
+[`ExplicitManifoldODEProblemType`](@ref) formulation. See tableau 6.1 of [OwrenMarthinsen:1999](@cite):
 
 ```math
 \begin{array}{c|ccc}
@@ -309,11 +304,6 @@ A Crouch-Grossmann algorithm of second order for problems in the
 & \frac{13}{51} & -\frac{2}{3} & \frac{24}{17}
 \end{array}
 ```
-
-[^OwrenMarthinsen1999]:
-    > B. Owren and A. Marthinsen, “Runge-Kutta Methods Adapted to Manifolds and Based on
-    > Rigid Frames,” BIT Numerical Mathematics, vol. 39, no. 1, pp. 116–142, Mar. 1999,
-    > doi: [10.1023/A:1022325426017](https://doi.org/10.1023/A:1022325426017).
 
 """
 struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
@@ -412,12 +402,7 @@ end
 
 A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See coefficients from
-Example 1 of [^JackiewiczMarthinsenOwren2000].
-
-[^JackiewiczMarthinsenOwren2000]:
-    > Z. Jackiewicz, A. Marthinsen, and B. Owren, “Construction of Runge–Kutta methods of
-    > Crouch–Grossman type of high order,” Advances in Computational Mathematics, vol. 13,
-    > no. 4, pp. 405–415, Dec. 2000, doi: [10.1023/A:1016645730465](https://doi.org/10.1023/A:1016645730465).
+Example 1 of [JackiewiczMarthinsenOwren:2000](@cite).
 """
 struct CG4a{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
     manifold::TM

@@ -1,7 +1,7 @@
 # Frozen coefficients solvers
 
 An initial value problem manifold ordinary differential equation in the frozen coefficients
-formulation by Crouch and Grossman, see [^CrouchGrossman1993].
+formulation by Crouch and Grossman, see [CrouchGrossman:1993](@cite).
 
 A frozen coefficients ODE on manifold ``M`` is defined in terms a vector field
 ``F\colon (M × P × ℝ) \to T_p M`` where ``p`` is the point given as the third argument to ``F``,
@@ -14,7 +14,7 @@ a subtype of [`AbstractVectorTransportOperator`](@ref ManifoldDiffEq.AbstractVec
 A solution to this problem is a curve ``y\colon ℝ\to M`` such that ``y(0)=y_0`` and for each
 ``t \in [0, T]`` we have ``D_t y(t) = F(y(t), p, t)``.
 
-The problem is usually studied for manifolds that are Lie groups or homogeneous manifolds, see[^CelledoniMarthinsenOwren2014].
+The problem is usually studied for manifolds that are Lie groups or homogeneous manifolds, see[CelledoniMarthinsenOwren:2014](@cite).
 
 Note that in this formulation ``s``-stage explicit Runge-Kutta schemes that for ``\mathbb{R}^n`` are defined by equations
 
@@ -52,12 +52,6 @@ u_{n+1} &= \exp_{u_{b,s-1}}(h b_s X_{b,s})
 ````
 
 Vector transports correspond to handling frozen coefficients. Note that the implementation allows for easy substitution of methods used for calculation of the exponential map (for example to use an approximation) and vector transport (if the default vector transport is not suitable for the problem). It is desirable to use a flat vector transport instead of a torsion-free one when available, for example the plus or minus Cartan-Schouten connections on Lie groups.
-
-[^CelledoniMarthinsenOwren2014]:
-    > E. Celledoni, H. Marthinsen, and B. Owren,
-    > “An introduction to Lie group integrators -- basics, new developments and applications,”
-    > Journal of Computational Physics, vol. 257, pp. 1040–1061, Jan. 2014,
-    > doi: [10.1016/j.jcp.2012.12.031](https://doi.org/10.1016/j.jcp.2012.12.031).
 
 ```@autodocs
 Modules = [ManifoldDiffEq]

@@ -25,7 +25,7 @@ struct LieODEProblemType end
     ExplicitManifoldODEProblemType
 
 An initial value problem manifold ordinary differential equation in the frozen coefficients
-formulation by Crouch and Grossman, see [^CrouchGrossman1993].
+formulation by Crouch and Grossman, see [CrouchGrossman:1993](@cite).
 
 A frozen coefficients ODE on manifold ``M`` is defined in terms a vector field
 ``F: (M × P × ℝ) \to T_p M`` where ``p`` is the point given as the third argument to ``F``,
@@ -37,11 +37,6 @@ have ``D_t y(t) = F(y(t), p, t)``,
 
     Proofs of convergence and order have several assumptions, including time-independence
     of ``F``. Integrators may not work well if these assumptions do not hold.
-
-[^CrouchGrossman1993]:
-    > P. E. Crouch and R. Grossman, “Numerical integration of ordinary differential
-    > equations on manifolds,” J Nonlinear Sci, vol. 3, no. 1, pp. 1–33, Dec. 1993,
-    > doi: [10.1007/BF02429858](https://doi.org/10.1007/BF02429858).
 
 """
 struct ExplicitManifoldODEProblemType end
