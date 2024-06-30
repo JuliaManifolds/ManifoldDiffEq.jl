@@ -224,7 +224,8 @@ function build_solution(
         interp.cache,
         prob.manifold,
     )
-    return ODESolution{T,1}(
+    N = ndims(eltype(u)) + 1
+    return ODESolution{T,N}(
         u,
         nothing,
         nothing,
