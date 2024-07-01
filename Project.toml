@@ -1,7 +1,7 @@
 name = "ManifoldDiffEq"
 uuid = "1143c485-9b25-4e23-a65f-701df382ec90"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.1.7"
+version = "0.1.8"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -22,7 +22,7 @@ ManifoldsBase = "0.15"
 Markdown = "1.6"
 OrdinaryDiffEq = "6"
 RecursiveArrayTools = "2, 3"
-SciMLBase = "1.0, 2"
+SciMLBase = "1.0, 2 - 2.39"
 julia = "1.6"
 
 [extras]
