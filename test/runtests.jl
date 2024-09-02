@@ -1,9 +1,7 @@
 using Test
 using ManifoldDiffEq
 using Manifolds
-using OrdinaryDiffEq: OrdinaryDiffEq, alg_order
 using LinearAlgebra
-using DiffEqBase
 using RecursiveArrayTools
 
 function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive = false)

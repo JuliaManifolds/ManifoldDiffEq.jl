@@ -97,7 +97,7 @@ struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
     end
 
     """
-        ManifoldODEProblem{isinplace}(f,u0,tspan,p=NullParameters(),callback=CallbackSet())
+        ManifoldODEProblem{isinplace}(f, u0, tspan, p=NullParameters(), callback=CallbackSet())
 
     Define an ODE problem with the specified function.
     `isinplace` optionally sets whether the function is inplace or not.
@@ -119,39 +119,6 @@ struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
             p;
             kwargs...,
         )
-    end
-
-    function ManifoldODEProblem{iip,recompile}(
-        f,
-        u0,
-        tspan,
-        manifold::AbstractManifold,
-        p = NullParameters();
-        kwargs...,
-    ) where {iip,recompile}
-        if !recompile
-            if iip
-                ManifoldODEProblem{iip}(
-                    wrapfun_iip(f, (u0, u0, p, tspan[1])),
-                    u0,
-                    tspan,
-                    manifold,
-                    p;
-                    kwargs...,
-                )
-            else
-                ManifoldODEProblem{iip}(
-                    wrapfun_oop(f, (u0, p, tspan[1])),
-                    u0,
-                    tspan,
-                    manifold,
-                    p;
-                    kwargs...,
-                )
-            end
-        else
-            ManifoldODEProblem{iip}(f, u0, tspan, p, manifold; kwargs...)
-        end
     end
 end
 
@@ -182,7 +149,7 @@ function ManifoldODEProblem(
     return ManifoldODEProblem(ODEFunction(f), u0, tspan, manifold, p; kwargs...)
 end
 
-function OrdinaryDiffEq.ode_determine_initdt(
+function ode_determine_initdt(
     u0,
     t,
     tdir,
@@ -198,45 +165,41 @@ function OrdinaryDiffEq.ode_determine_initdt(
     return convert(_tType, oneunit_tType * 1 // 10^(6))
 end
 
-function build_solution(
-    prob::ManifoldODEProblem,
-    alg,
-    t,
-    u;
-    timeseries_errors = length(u) > 2,
-    dense = false,
-    dense_errors = dense,
-    calculate_error = true,
-    k = nothing,
-    interp::InterpolationData,
-    retcode = ReturnCode.Default,
-    stats = nothing,
-    kwargs...,
-)
-    T = eltype(eltype(u))
+# function build_solution(
+#     prob::ManifoldODEProblem,
+#     alg,
+#     t,
+#     u;
+#     dense = false,
+#     k = nothing,
+#     interp::InterpolationData,
+#     retcode = ReturnCode.Default,
+#     stats = nothing,
+# )
+#     T = eltype(eltype(u))
 
-    manifold_interp = ManifoldInterpolationData(
-        interp.f,
-        interp.timeseries,
-        interp.ts,
-        interp.ks,
-        interp.dense,
-        interp.cache,
-        prob.manifold,
-    )
-    return ODESolution{T,1}(
-        u,
-        nothing,
-        nothing,
-        t,
-        k,
-        prob,
-        alg,
-        manifold_interp,
-        dense,
-        0,
-        stats,
-        nothing,
-        retcode,
-    )
-end
+#     manifold_interp = ManifoldInterpolationData(
+#         interp.f,
+#         interp.timeseries,
+#         interp.ts,
+#         interp.ks,
+#         interp.dense,
+#         interp.cache,
+#         prob.manifold,
+#     )
+#     return ManifoldODESolution{T}(
+#         u,
+#         nothing,
+#         nothing,
+#         t,
+#         k,
+#         prob,
+#         alg,
+#         manifold_interp,
+#         dense,
+#         0,
+#         stats,
+#         nothing,
+#         retcode,
+#     )
+# end

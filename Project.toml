@@ -1,37 +1,34 @@
 name = "ManifoldDiffEq"
 uuid = "1143c485-9b25-4e23-a65f-701df382ec90"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.1.9"
+version = "0.2.0"
 
 [deps]
-DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
-OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
+SimpleUnPack = "ce78b400-467f-4804-87d8-8f486da07d0a"
 
 [compat]
-DiffEqBase = "6"
 DoubleFloats = ">= 0.9.2"
 LinearAlgebra = "1.6"
 Manifolds = "0.10"
 ManifoldsBase = "0.15"
 Markdown = "1.6"
-OrdinaryDiffEq = "6"
 RecursiveArrayTools = "2, 3"
-SciMLBase = "1.0, 2 - 2.39"
+SciMLBase = "2"
+SimpleUnPack = "1"
 julia = "1.6"
 
 [extras]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "DoubleFloats", "ForwardDiff", "OrdinaryDiffEq", "ReverseDiff", "StaticArrays"]
+test = ["Test", "DoubleFloats", "ForwardDiff", "ReverseDiff", "StaticArrays"]

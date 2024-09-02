@@ -5,8 +5,7 @@
 The manifold Euler algorithm for problems in the [`ExplicitManifoldODEProblemType`](@ref)
 formulation.
 """
-struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       OrdinaryDiffEqAlgorithm
+struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod}
     manifold::TM
     retraction_method::TR
 end
@@ -16,16 +15,16 @@ alg_order(::ManifoldEuler) = 1
 """
     ManifoldEulerCache
 
-Cache for [`ManifoldEuler`](@ref).
+Mutable cache for [`ManifoldEuler`](@ref).
 """
-struct ManifoldEulerCache <: OrdinaryDiffEqMutableCache end
+struct ManifoldEulerCache end
 
 """
     ManifoldEulerConstantCache
 
 Cache for [`ManifoldEuler`](@ref).
 """
-struct ManifoldEulerConstantCache <: OrdinaryDiffEqConstantCache end
+struct ManifoldEulerConstantCache end
 
 function alg_cache(
     alg::ManifoldEuler,
@@ -48,10 +47,12 @@ function alg_cache(
 end
 
 function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
-    @unpack t, dt, uprev, u, f, p, alg = integrator
+    u = integrator.u
+    t = integrator.t
+    alg = integrator.alg
 
-    k = f(u, p, t)
-    retract!(alg.manifold, u, u, k, dt, alg.retraction_method)
+    k = integrator.f(u, integrator.p, t)
+    retract!(alg.manifold, u, u, k, integrator.dt, alg.retraction_method)
 
     return integrator.stats.nf += 1
 end
@@ -84,7 +85,8 @@ The Butcher tableau is identical to the Euclidean RK2:
 \end{array}
 ```
 """
-struct CG2{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
+struct CG2{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+       AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -94,9 +96,9 @@ alg_order(::CG2) = 2
 """
     CG2Cache
 
-Cache for [`CG2`](@ref).
+Mutable cache for [`CG2`](@ref).
 """
-struct CG2Cache{TX,TK2u} <: OrdinaryDiffEqMutableCache
+struct CG2Cache{TX,TK2u}
     X1::TX
     X2u::TK2u
     X2::TX
@@ -171,7 +173,7 @@ The Butcher tableau reads (see tableau (5) of [EngøMarthinsen:1998](@cite)):
 The last row is used for error estimation.
 """
 struct CG2_3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       OrdinaryDiffEqAdaptiveAlgorithm
+       AbstractManifoldDiffEqAdaptiveAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -183,7 +185,7 @@ alg_order(::CG2_3) = 2
 
 Cache for [`CG2_3`](@ref).
 """
-struct CG2_3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG2_3Cache{TX,TP}
     X1::TX
     X2::TX
     X3::TX
@@ -306,7 +308,8 @@ A Crouch-Grossmann algorithm of second order for problems in the
 ```
 
 """
-struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
+struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+       AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -316,9 +319,9 @@ alg_order(::CG3) = 3
 """
     CG3Cache
 
-Cache for [`CG3`](@ref).
+Mutable cache for [`CG3`](@ref).
 """
-struct CG3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG3Cache{TX,TP}
     X1::TX
     X2::TX
     X3::TX
@@ -404,7 +407,8 @@ A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See coefficients from
 Example 1 of [JackiewiczMarthinsenOwren:2000](@cite).
 """
-struct CG4a{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <: OrdinaryDiffEqAlgorithm
+struct CG4a{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+       AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -414,9 +418,9 @@ alg_order(::CG4a) = 4
 """
     CG4aCache
 
-Cache for [`CG4a`](@ref).
+Mutable cache for [`CG4a`](@ref).
 """
-struct CG4aCache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG4aCache{TX,TP}
     X1::TX
     X2::TX
     X3::TX

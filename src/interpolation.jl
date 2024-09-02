@@ -1,7 +1,12 @@
 
 
-struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM} <:
-       OrdinaryDiffEq.OrdinaryDiffEqInterpolation{cacheType}
+"""
+    struct ManifoldInterpolationData end
+
+
+Inspired by `OrdinaryDiffEq.OrdinaryDiffEqInterpolation`.
+"""
+struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM}
     f::F
     timeseries::uType
     ts::tType
