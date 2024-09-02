@@ -222,6 +222,10 @@ function alg_cache(
     )
 end
 
+function DiffEqBase.get_tmp_cache(integrator, ::CG2_3, cache::CG2_3Cache)
+    return (cache.X1,)
+end
+
 function initialize!(integrator, cache::CG2_3Cache)
     integrator.kshortsize = 2
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
