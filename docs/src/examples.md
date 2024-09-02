@@ -2,7 +2,7 @@
 
 We take a look at the simple example from
 
-In the following code an ODE on a sphere is solved the introductionary example from the
+In the following code an ODE on a sphere is solved the introductory example from the
 [lecture notes](https://www.unige.ch/~hairer/poly-sde-mani.pdf) by [E. Hairer](http://www.unige.ch/~hairer/).
 
 We solve the ODE system on the sphere ``\mathbb S^2`` given by
@@ -27,7 +27,7 @@ We solve the ODE system on the sphere ``\mathbb S^2`` given by
 ```
 
 ```julia
-using ManifoldDiffEq, OrdinaryDiffEq, Manifolds
+using ManifoldDiffEq, Manifolds
 using GLMakie, LinearAlgebra, Colors
 
 n = 25
@@ -72,15 +72,15 @@ S2 = Manifolds.Sphere(2)
 u0 = [0.0, sqrt(9/10), sqrt(1/10)]
 tspan = (0, 20.0)
 
-A_lie = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
+A_lie = LieManifoldDiffEqOperator{Float64}() do u, p, t
     return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
 end
-prob_lie = ManifoldDiffEq.ManifoldODEProblem(A_lie, u0, tspan, S2)
+prob_lie = ManifoldODEProblem(A_lie, u0, tspan, S2)
 
-A_frozen = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+A_frozen = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
     return f2(u...)
 end
-prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A_frozen, u0, tspan, S2)
+prob_frozen = ManifoldODEProblem(A_frozen, u0, tspan, S2)
 
 action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
 alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)

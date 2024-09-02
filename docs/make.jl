@@ -21,6 +21,7 @@ makedocs(
         "Error estimation" => "error_estimation.md",
         "Notation" => "notation.md",
         "Examples" => "examples.md",
+        "Internals" => "internals.md",
         "References" => "references.md",
     ],
     plugins = [bib],

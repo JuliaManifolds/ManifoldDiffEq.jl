@@ -663,4 +663,6 @@ include("lie_solvers.jl")
 
 export alg_order, solve
 
+export FrozenManifoldDiffEqOperator, LieManifoldDiffEqOperator, ManifoldODEProblem
+
 end # module
