@@ -165,41 +165,31 @@ function ode_determine_initdt(
     return convert(_tType, oneunit_tType * 1 // 10^(6))
 end
 
-# function build_solution(
-#     prob::ManifoldODEProblem,
-#     alg,
-#     t,
-#     u;
-#     dense = false,
-#     k = nothing,
-#     interp::InterpolationData,
-#     retcode = ReturnCode.Default,
-#     stats = nothing,
-# )
-#     T = eltype(eltype(u))
-
-#     manifold_interp = ManifoldInterpolationData(
-#         interp.f,
-#         interp.timeseries,
-#         interp.ts,
-#         interp.ks,
-#         interp.dense,
-#         interp.cache,
-#         prob.manifold,
-#     )
-#     return ManifoldODESolution{T}(
-#         u,
-#         nothing,
-#         nothing,
-#         t,
-#         k,
-#         prob,
-#         alg,
-#         manifold_interp,
-#         dense,
-#         0,
-#         stats,
-#         nothing,
-#         retcode,
-#     )
-# end
+function build_solution(
+    prob::ManifoldODEProblem,
+    alg,
+    t,
+    u;
+    dense = false,
+    k = nothing,
+    manifold_interp::ManifoldInterpolationData,
+    retcode = ReturnCode.Default,
+    stats = nothing,
+)
+    T = eltype(eltype(u))
+    return ManifoldODESolution{T}(
+        u,
+        nothing,
+        nothing,
+        t,
+        k,
+        prob,
+        alg,
+        manifold_interp,
+        dense,
+        0,
+        stats,
+        nothing,
+        retcode,
+    )
+end

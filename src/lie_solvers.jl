@@ -22,7 +22,7 @@ alg_order(::ManifoldLieEuler) = 1
 
 Mutable cache for [`ManifoldLieEuler`](@ref).
 """
-struct ManifoldLieEulerCache{TID<:Identity}
+struct ManifoldLieEulerCache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID
 end
 
@@ -31,7 +31,7 @@ end
 
 Constant cache for [`ManifoldLieEuler`](@ref).
 """
-struct ManifoldLieEulerConstantCache end
+struct ManifoldLieEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
     alg::ManifoldLieEuler,
@@ -115,7 +115,7 @@ alg_order(::RKMK4) = 4
 
 Mutable cache for [`RKMK4`](@ref).
 """
-struct RKMK4Cache{TID<:Identity}
+struct RKMK4Cache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID
 end
 
@@ -124,7 +124,7 @@ end
 
 Constant cache for [`RKMK4`](@ref).
 """
-struct RKMK4ConstantCache end
+struct RKMK4ConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
     alg::RKMK4,

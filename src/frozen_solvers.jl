@@ -5,7 +5,8 @@
 The manifold Euler algorithm for problems in the [`ExplicitManifoldODEProblemType`](@ref)
 formulation.
 """
-struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod}
+struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
+       AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -17,14 +18,14 @@ alg_order(::ManifoldEuler) = 1
 
 Mutable cache for [`ManifoldEuler`](@ref).
 """
-struct ManifoldEulerCache end
+struct ManifoldEulerCache <: OrdinaryDiffEqMutableCache end
 
 """
     ManifoldEulerConstantCache
 
 Cache for [`ManifoldEuler`](@ref).
 """
-struct ManifoldEulerConstantCache end
+struct ManifoldEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
     alg::ManifoldEuler,
@@ -98,7 +99,7 @@ alg_order(::CG2) = 2
 
 Mutable cache for [`CG2`](@ref).
 """
-struct CG2Cache{TX,TK2u}
+struct CG2Cache{TX,TK2u} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2u::TK2u
     X2::TX
@@ -185,7 +186,7 @@ alg_order(::CG2_3) = 2
 
 Cache for [`CG2_3`](@ref).
 """
-struct CG2_3Cache{TX,TP}
+struct CG2_3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
@@ -321,7 +322,7 @@ alg_order(::CG3) = 3
 
 Mutable cache for [`CG3`](@ref).
 """
-struct CG3Cache{TX,TP}
+struct CG3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
@@ -420,7 +421,7 @@ alg_order(::CG4a) = 4
 
 Mutable cache for [`CG4a`](@ref).
 """
-struct CG4aCache{TX,TP}
+struct CG4aCache{TX,TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
