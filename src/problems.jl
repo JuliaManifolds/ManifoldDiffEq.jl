@@ -179,8 +179,6 @@ function build_solution(
     T = eltype(eltype(u))
     return ManifoldODESolution{T}(
         u,
-        nothing,
-        nothing,
         t,
         k,
         prob,
@@ -189,7 +187,6 @@ function build_solution(
         dense,
         0,
         stats,
-        nothing,
         retcode,
     )
 end

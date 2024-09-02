@@ -82,26 +82,12 @@ isadaptive(::AbstractManifoldDiffEqAdaptiveAlgorithm) = true
 """
     struct ManifoldODESolution end
 
-Counterpart of `SciMLBase.ODESolution`. It doesn't use the `N` parameter.
+Counterpart of `SciMLBase.ODESolution`. It doesn't use the `N` parameter (because it
+is not a generic manifold concept) and fields `u_analytic`, `errors`, `alg_choice`,
+`original` and `resid` (because we don't use them currently in `ManifoldDiffEq.jl`).
 """
-mutable struct ManifoldODESolution{
-    T,
-    uType,
-    uType2,
-    DType,
-    tType,
-    rateType,
-    P,
-    A,
-    IType,
-    S,
-    AC<:Union{Nothing,Vector{Int}},
-    R,
-    O,
-}
+mutable struct ManifoldODESolution{T,uType,tType,rateType,P,A,IType,S}
     u::uType
-    u_analytic::uType2
-    errors::DType
     t::tType
     k::rateType
     prob::P
@@ -110,16 +96,11 @@ mutable struct ManifoldODESolution{
     dense::Bool
     tslocation::Int
     stats::S
-    alg_choice::AC
     retcode::ReturnCode.T
-    resid::R
-    original::O
 end
 
 function ManifoldODESolution{T}(
     u,
-    u_analytic,
-    errors,
     t,
     k,
     prob,
@@ -128,29 +109,19 @@ function ManifoldODESolution{T}(
     dense,
     tslocation,
     stats,
-    alg_choice,
     retcode,
-    resid = nothing,
-    original = nothing,
 ) where {T}
     return ManifoldODESolution{
         T,
         typeof(u),
-        typeof(u_analytic),
-        typeof(errors),
         typeof(t),
         typeof(k),
         typeof(prob),
         typeof(alg),
         typeof(interp),
         typeof(stats),
-        typeof(alg_choice),
-        typeof(resid),
-        typeof(original),
     }(
         u,
-        u_analytic,
-        errors,
         t,
         k,
         prob,
@@ -159,10 +130,7 @@ function ManifoldODESolution{T}(
         dense,
         tslocation,
         stats,
-        alg_choice,
         retcode,
-        resid,
-        original,
     )
 end
 
