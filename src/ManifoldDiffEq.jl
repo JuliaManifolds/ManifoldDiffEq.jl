@@ -71,9 +71,11 @@ abstract type AbstractManifoldDiffEqAlgorithm <: OrdinaryDiffEqAlgorithm end
 isadaptive(::AbstractManifoldDiffEqAlgorithm) = false
 
 """
-    abstract type AbstractManifoldDiffEqAdaptiveAlgorithm end
+    AbstractManifoldDiffEqAdaptiveAlgorithm <: AbstractManifoldDiffEqAlgorithm
+    
+An abstract subtype of `AbstractManifoldDiffEqAlgorithm` for adaptive algorithms.
+This is the manifold-aware analogue of `OrdinaryDiffEqAdaptiveAlgorithm`.
 
-Counterpart of `OrdinaryDiffEqAdaptiveAlgorithm`.
 """
 abstract type AbstractManifoldDiffEqAdaptiveAlgorithm <: AbstractManifoldDiffEqAlgorithm end
 
@@ -98,8 +100,8 @@ Fields:
 * `alg`: [`AbstractManifoldDiffEqAlgorithm`](@ref) used to obtain the solution.
 * `interp` [`ManifoldInterpolationData`](@ref)
 * `dense`: `true` if ODE solution is saved at every step and `false` otherwise.
-* `stats`: [`DEStats`](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/#SciMLBase.DEStats) of solver
-* `retcode`: [`ReturnCode`}(https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
+* `stats`: [`DEStats`](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/#SciMLBase.DEStats) of the solver
+* `retcode`: [`ReturnCode`](https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
 """
 struct ManifoldODESolution{
     T<:Real,
