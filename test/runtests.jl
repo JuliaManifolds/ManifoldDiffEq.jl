@@ -12,13 +12,13 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         @test alg_order(alg) == expected_order
     end
 
-    @testset "Sphere" begin
-        M = Sphere(2)
+    M = Sphere(2)
+    alg = manifold_to_alg(M)
+    @testset "$alg on sphere" begin
         A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return cross(u, [1.0, 0.0, 0.0])
         end
         u0 = [0.0, 1.0, 0.0]
-        alg = manifold_to_alg(M)
         prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = if adaptive
             solve(prob, alg)
@@ -30,13 +30,14 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         @test is_point(M, sol1(1.0))
     end
 
-    @testset "Product manifold" begin
-        M = ProductManifold(Sphere(2), Euclidean(3))
+    M = ProductManifold(Sphere(2), Euclidean(3))
+    alg = manifold_to_alg(M)
+    @testset "$alg on product manifold" begin
+
         A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return ArrayPartition(cross(u.x[1], [1.0, 0.0, 0.0]), u.x[2])
         end
         u0 = ArrayPartition([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
-        alg = manifold_to_alg(M)
         prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = if adaptive
             solve(prob, alg)

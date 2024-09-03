@@ -80,13 +80,37 @@ abstract type AbstractManifoldDiffEqAdaptiveAlgorithm <: AbstractManifoldDiffEqA
 isadaptive(::AbstractManifoldDiffEqAdaptiveAlgorithm) = true
 
 """
-    struct ManifoldODESolution end
+    struct ManifoldODESolution{T} end
 
 Counterpart of `SciMLBase.ODESolution`. It doesn't use the `N` parameter (because it
 is not a generic manifold concept) and fields `u_analytic`, `errors`, `alg_choice`,
-`original` and `resid` (because we don't use them currently in `ManifoldDiffEq.jl`).
+`original`, `tslocation` and `resid` (because we don't use them currently in
+`ManifoldDiffEq.jl`).
+
+Type parameter `T` denotes scalar floating point type of the solution
+
+Fields:
+* `u`: the representation of the ODE solution. Uses a nested power manifold representation.
+* `t`: time point at which values in `u` were calculated.
+* `k`: the representation of the `f` function evaluations at time points `k`. Uses a nested
+  power manifold representation.
+* `prob`: original problem that was solved.
+* `alg`: [`AbstractManifoldDiffEqAlgorithm`](@ref) used to obtain the solution.
+* `interp` [`ManifoldInterpolationData`](@ref)
+* `dense`: `true` if ODE solution is saved at every step and `false` otherwise.
+* `stats`: [`DEStats`](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/#SciMLBase.DEStats) of solver
+* `retcode`: [`ReturnCode`}(https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
 """
-mutable struct ManifoldODESolution{T,uType,tType,rateType,P,A,IType,S}
+struct ManifoldODESolution{
+    T<:Real,
+    uType,
+    tType,
+    rateType,
+    P,
+    A<:AbstractManifoldDiffEqAlgorithm,
+    IType,
+    S,
+}
     u::uType
     t::tType
     k::rateType
@@ -94,7 +118,6 @@ mutable struct ManifoldODESolution{T,uType,tType,rateType,P,A,IType,S}
     alg::A
     interp::IType
     dense::Bool
-    tslocation::Int
     stats::S
     retcode::ReturnCode.T
 end
@@ -107,10 +130,9 @@ function ManifoldODESolution{T}(
     alg,
     interp,
     dense,
-    tslocation,
     stats,
     retcode,
-) where {T}
+) where {T<:Real}
     return ManifoldODESolution{
         T,
         typeof(u),
@@ -128,13 +150,12 @@ function ManifoldODESolution{T}(
         alg,
         interp,
         dense,
-        tslocation,
         stats,
         retcode,
     )
 end
 
-constructorof(::Type{<:ManifoldODESolution{T}}) where {T} = ManifoldODESolution{T}
+constructorof(::Type{<:ManifoldODESolution{T}}) where {T<:Real} = ManifoldODESolution{T}
 
 function solution_new_retcode(sol::ManifoldODESolution, retcode)
     return @set sol.retcode = retcode
@@ -186,7 +207,7 @@ function SciMLBase.__init(
                      prob.tspan[1] in saveat,
     save_end = nothing,
     callback = nothing,
-    dense = save_everystep && isempty(saveat),
+    dense::Bool = save_everystep && isempty(saveat),
     calck = (callback !== nothing && callback !== CallbackSet()) ||
                 (dense) ||
                 !isempty(saveat), # and no dense output
@@ -196,8 +217,8 @@ function SciMLBase.__init(
     force_dtmin = false,
     adaptive = isadaptive(alg),
     gamma = gamma_default(alg),
-    abstol = nothing,
-    reltol = nothing,
+    abstol::Union{Nothing,Real} = nothing,
+    reltol::Union{Nothing,Real} = nothing,
     qmin = qmin_default(alg),
     qmax = qmax_default(alg),
     qsteady_min = qsteady_min_default(alg),
@@ -334,7 +355,6 @@ function SciMLBase.__init(
 
     ts = ts_init === () ? tType[] : convert(Vector{tType}, ts_init)
     ks = ks_init === () ? ksEltype[] : convert(Vector{ksEltype}, ks_init)
-    alg_choice = nothing
 
     if (!adaptive || !isadaptive(_alg)) && save_everystep && tspan[2] - tspan[1] != Inf
         if dt == 0
@@ -376,14 +396,14 @@ function SciMLBase.__init(
     k = rateType[]
 
     if uses_uprev(_alg, adaptive) || calck
-        uprev = recursivecopy(u)
+        uprev = copy(M, u)
     else
         # Some algorithms do not use `uprev` explicitly. In that case, we can save
         # some memory by aliasing `uprev = u`, e.g. for "2N" low storage methods.
         uprev = u
     end
     if allow_extrapolation
-        uprev2 = recursivecopy(u)
+        uprev2 = copy(M, u)
     else
         uprev2 = uprev
     end

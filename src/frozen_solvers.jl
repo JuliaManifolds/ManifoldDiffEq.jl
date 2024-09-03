@@ -52,8 +52,8 @@ function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
     t = integrator.t
     alg = integrator.alg
 
-    k = integrator.f(u, integrator.p, t)
-    retract!(alg.manifold, u, u, k, integrator.dt, alg.retraction_method)
+    integrator.k[1] = integrator.f(u, integrator.p, t)
+    retract!(alg.manifold, u, u, integrator.k[1], integrator.dt, alg.retraction_method)
 
     return integrator.stats.nf += 1
 end

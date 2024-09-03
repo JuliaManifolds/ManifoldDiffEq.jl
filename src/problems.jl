@@ -185,7 +185,6 @@ function build_solution(
         alg,
         manifold_interp,
         dense,
-        0,
         stats,
         retcode,
     )
