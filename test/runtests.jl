@@ -241,4 +241,28 @@ end
         (M, action) -> ManifoldDiffEq.RKMK4(M, ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_rkmk4; expected_order = 4)
     compare_with_diffeq_lie(manifold_to_alg_rkmk4, constructRKMK4())
+
+    @testset "abstol and reltol" begin
+        M = Sphere(2)
+        alg = ManifoldDiffEq.CG2_3(M, ExponentialRetraction())
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+            return cross(u, [1.0, 0.0, 0.0])
+        end
+        u0 = [0.0, 1.0, 0.0]
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
+        sol = solve(prob, alg; abstol = 0.1, reltol = 0.3)
+    end
+
+    @testset "saveat" begin
+        M = Sphere(2)
+        alg = ManifoldDiffEq.CG2_3(M, ExponentialRetraction())
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+            return cross(u, [1.0, 0.0, 0.0])
+        end
+        u0 = [0.0, 1.0, 0.0]
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
+        saveat = [0.0, 0.2, 2.0]
+        sol = solve(prob, alg; saveat = saveat)
+        @test sol.t ≈ saveat
+    end
 end

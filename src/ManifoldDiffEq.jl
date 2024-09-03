@@ -282,25 +282,15 @@ function SciMLBase.__init(
     tTypeNoUnits = typeof(one(tType))
 
     if abstol === nothing
-        if uBottomEltypeNoUnits == uBottomEltype
-            abstol_internal =
-                real(convert(uBottomEltype, oneunit(uBottomEltype) * 1 // 10^6))
-        else
-            abstol_internal = ForwardDiff.value.(real.(oneunit.(u) .* 1 // 10^6))
-        end
+        abstol_internal = real(convert(uBottomEltype, oneunit(uBottomEltype) * 1 // 10^6))
     else
-        abstol_internal = real.(abstol)
+        abstol_internal = real(abstol)
     end
 
     if reltol === nothing
-        if uBottomEltypeNoUnits == uBottomEltype
-            reltol_internal =
-                real(convert(uBottomEltype, oneunit(uBottomEltype) * 1 // 10^3))
-        else
-            reltol_internal = real.(oneunit.(u) .* 1 // 10^3)
-        end
+        reltol_internal = real(convert(uBottomEltype, oneunit(uBottomEltype) * 1 // 10^3))
     else
-        reltol_internal = real.(reltol)
+        reltol_internal = real(reltol)
     end
 
     dtmax > zero(dtmax) && tdir < 0 && (dtmax *= tdir) # Allow positive dtmax, but auto-convert
