@@ -9,7 +9,7 @@ struct ManifoldLieEuler{
     TM<:AbstractManifold,
     TR<:AbstractRetractionMethod,
     TG<:AbstractGroupAction,
-} <: OrdinaryDiffEqAlgorithm
+} <: AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
     action::TG
@@ -20,7 +20,7 @@ alg_order(::ManifoldLieEuler) = 1
 """
     ManifoldLieEulerCache
 
-Cache for [`ManifoldLieEuler`](@ref).
+Mutable cache for [`ManifoldLieEuler`](@ref).
 """
 struct ManifoldLieEulerCache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID
@@ -102,7 +102,7 @@ The Butcher tableau is:
 For more details see [MuntheKaasOwren:1999](@cite).
 """
 struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
-       OrdinaryDiffEqAlgorithm
+       AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
     action::TG
@@ -113,7 +113,7 @@ alg_order(::RKMK4) = 4
 """
     RKMK4Cache
 
-Cache for [`RKMK4`](@ref).
+Mutable cache for [`RKMK4`](@ref).
 """
 struct RKMK4Cache{TID<:Identity} <: OrdinaryDiffEqMutableCache
     id::TID

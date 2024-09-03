@@ -1,7 +1,12 @@
 
 
-struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM} <:
-       OrdinaryDiffEq.OrdinaryDiffEqInterpolation{cacheType}
+"""
+    struct ManifoldInterpolationData end
+
+Inspired by [`OrdinaryDiffEq.InterpolationData`](https://github.com/SciML/OrdinaryDiffEq.jl/blob/41333beef24655d43d370af19b37efd9888179f6/lib/OrdinaryDiffEqCore/src/interp_func.jl#L4).
+The main difference is using on-manifold interpolation instead of the Euclidean one.
+"""
+struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM}
     f::F
     timeseries::uType
     ts::tType
@@ -54,12 +59,13 @@ function ode_interpolation(
     if continuity === :left
         # we have i₋ = i₊ = 1 if tval = ts[1], i₊ = i₋ + 1 = lastindex(ts) if tval > ts[end],
         # and otherwise i₋ and i₊ satisfy ts[i₋] < tval ≤ ts[i₊]
-        i₊ = min(lastindex(ts), OrdinaryDiffEq._searchsortedfirst(ts, tval, 2, tdir > 0))
+        i₊ =
+            min(lastindex(ts), OrdinaryDiffEqCore._searchsortedfirst(ts, tval, 2, tdir > 0))
         i₋ = i₊ > 1 ? i₊ - 1 : i₊
     else
         # we have i₋ = i₊ - 1 = 1 if tval < ts[1], i₊ = i₋ = lastindex(ts) if tval = ts[end],
         # and otherwise i₋ and i₊ satisfy ts[i₋] ≤ tval < ts[i₊]
-        i₋ = max(1, OrdinaryDiffEq._searchsortedlast(ts, tval, 1, tdir > 0))
+        i₋ = max(1, OrdinaryDiffEqCore._searchsortedlast(ts, tval, 1, tdir > 0))
         i₊ = i₋ < lastindex(ts) ? i₋ + 1 : i₋
     end
 

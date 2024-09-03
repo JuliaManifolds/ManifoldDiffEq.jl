@@ -1,10 +1,10 @@
 using Test
 using ManifoldDiffEq
 using Manifolds
-using OrdinaryDiffEq: OrdinaryDiffEq, alg_order
 using LinearAlgebra
-using DiffEqBase
 using RecursiveArrayTools
+using DiffEqBase
+using OrdinaryDiffEq
 
 function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive = false)
     expected_order !== nothing && @testset "alg_order" begin
@@ -12,14 +12,14 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         @test alg_order(alg) == expected_order
     end
 
-    @testset "Sphere" begin
-        M = Sphere(2)
-        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+    M = Sphere(2)
+    alg = manifold_to_alg(M)
+    @testset "$alg on sphere" begin
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return cross(u, [1.0, 0.0, 0.0])
         end
         u0 = [0.0, 1.0, 0.0]
-        alg = manifold_to_alg(M)
-        prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = if adaptive
             solve(prob, alg)
         else
@@ -30,14 +30,15 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         @test is_point(M, sol1(1.0))
     end
 
-    @testset "Product manifold" begin
-        M = ProductManifold(Sphere(2), Euclidean(3))
-        A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+    M = ProductManifold(Sphere(2), Euclidean(3))
+    alg = manifold_to_alg(M)
+    @testset "$alg on product manifold" begin
+
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return ArrayPartition(cross(u.x[1], [1.0, 0.0, 0.0]), u.x[2])
         end
         u0 = ArrayPartition([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
-        alg = manifold_to_alg(M)
-        prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = if adaptive
             solve(prob, alg)
         else
@@ -61,12 +62,12 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
         M = Sphere(2)
         action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
 
-        A = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}() do u, p, t
+        A = LieManifoldDiffEqOperator{Float64}() do u, p, t
             return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, [1.0, 0.0, 0.0]))
         end
         u0 = [0.0, 1.0, 0.0]
         alg = manifold_to_alg(M, action)
-        prob = ManifoldDiffEq.ManifoldODEProblem(A, u0, (0, 2.0), M)
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
         sol1 = solve(prob, alg, dt = 1 / 8)
 
         @test sol1(0.0) ≈ u0
@@ -170,12 +171,12 @@ function compare_with_diffeq_frozen(manifold_to_alg, tableau)
     k = -0.25
     c = 1
     f(u, p, t) = [-c * u[1] - k * u[2], u[1]]
-    A = ManifoldDiffEq.FrozenManifoldDiffEqOperator{Float64}(f)
+    A = FrozenManifoldDiffEqOperator{Float64}(f)
     u0 = [-1.0, 1.0]
     alg = manifold_to_alg(M)
     tspan = (0, 2.0)
     dt = 1 / 8
-    prob_frozen = ManifoldDiffEq.ManifoldODEProblem(A, u0, tspan, M)
+    prob_frozen = ManifoldODEProblem(A, u0, tspan, M)
     sol_frozen = solve(prob_frozen, alg, dt = dt)
 
     alg_diffeq = OrdinaryDiffEq.ExplicitRK(tableau)
@@ -193,12 +194,12 @@ function compare_with_diffeq_lie(manifold_to_alg, tableau)
     f(u, p, t) = [-c * u[1] - k * u[2], u[1]]
     action = TranslationAction(Euclidean(2), TranslationGroup(2))
 
-    A = ManifoldDiffEq.LieManifoldDiffEqOperator{Float64}(f)
+    A = LieManifoldDiffEqOperator{Float64}(f)
     u0 = [-1.0, 1.0]
     alg = manifold_to_alg(M, action)
     tspan = (0, 2.0)
     dt = 1 / 8
-    prob_lie = ManifoldDiffEq.ManifoldODEProblem(A, u0, tspan, M)
+    prob_lie = ManifoldODEProblem(A, u0, tspan, M)
     sol_lie = solve(prob_lie, alg, dt = dt)
 
     alg_diffeq = OrdinaryDiffEq.ExplicitRK(tableau)
@@ -240,4 +241,28 @@ end
         (M, action) -> ManifoldDiffEq.RKMK4(M, ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_rkmk4; expected_order = 4)
     compare_with_diffeq_lie(manifold_to_alg_rkmk4, constructRKMK4())
+
+    @testset "abstol and reltol" begin
+        M = Sphere(2)
+        alg = ManifoldDiffEq.CG2_3(M, ExponentialRetraction())
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+            return cross(u, [1.0, 0.0, 0.0])
+        end
+        u0 = [0.0, 1.0, 0.0]
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
+        sol = solve(prob, alg; abstol = 0.1, reltol = 0.3)
+    end
+
+    @testset "saveat" begin
+        M = Sphere(2)
+        alg = ManifoldDiffEq.CG2_3(M, ExponentialRetraction())
+        A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
+            return cross(u, [1.0, 0.0, 0.0])
+        end
+        u0 = [0.0, 1.0, 0.0]
+        prob = ManifoldODEProblem(A, u0, (0, 2.0), M)
+        saveat = [0.0, 0.2, 2.0]
+        sol = solve(prob, alg; saveat = saveat)
+        @test sol.t ≈ saveat
+    end
 end
