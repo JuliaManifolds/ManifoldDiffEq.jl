@@ -93,12 +93,13 @@ Type parameter `T` denotes scalar floating point type of the solution
 
 Fields:
 * `u`: the representation of the ODE solution. Uses a nested power manifold representation.
-* `t`: time point at which values in `u` were calculated.
+* `t`: time points at which values in `u` were calculated.
 * `k`: the representation of the `f` function evaluations at time points `k`. Uses a nested
   power manifold representation.
 * `prob`: original problem that was solved.
 * `alg`: [`AbstractManifoldDiffEqAlgorithm`](@ref) used to obtain the solution.
-* `interp` [`ManifoldInterpolationData`](@ref)
+* `interp` [`ManifoldInterpolationData`](@ref). It is used for calculating solution values
+  at times `t` other then the ones at which it was saved.
 * `dense`: `true` if ODE solution is saved at every step and `false` otherwise.
 * `stats`: [`DEStats`](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/#SciMLBase.DEStats) of the solver
 * `retcode`: [`ReturnCode`](https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
@@ -191,6 +192,9 @@ alg_extrapolates(::AbstractManifoldDiffEqAlgorithm) = false
 
 struct DefaultInit end
 
+
+# Adapted from OrdinaryDiffEq.jl:
+# https://github.com/SciML/OrdinaryDiffEq.jl/blob/1eef9db17600766bb71e7dce0cb105ae5f99b2a5/lib/OrdinaryDiffEqCore/src/solve.jl#L11
 function SciMLBase.__init(
     prob::ManifoldODEProblem,
     alg::AbstractManifoldDiffEqAlgorithm,

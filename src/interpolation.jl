@@ -3,8 +3,8 @@
 """
     struct ManifoldInterpolationData end
 
-
-Inspired by `OrdinaryDiffEq.OrdinaryDiffEqInterpolation`.
+Inspired by [`OrdinaryDiffEq.InterpolationData`](https://github.com/SciML/OrdinaryDiffEq.jl/blob/41333beef24655d43d370af19b37efd9888179f6/lib/OrdinaryDiffEqCore/src/interp_func.jl#L4).
+The main difference is using on-manifold interpolation instead of the Euclidean one.
 """
 struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM}
     f::F
