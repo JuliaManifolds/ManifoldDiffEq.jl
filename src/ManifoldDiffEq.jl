@@ -1,6 +1,7 @@
 module ManifoldDiffEq
 
 using ManifoldsBase
+using ManifoldsBase: retract_fused, retract_fused!
 using Manifolds
 
 using LinearAlgebra
