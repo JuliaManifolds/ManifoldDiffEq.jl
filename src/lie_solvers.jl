@@ -60,7 +60,7 @@ function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = f
     action = alg.action
     k = apply_diff_group(action, cache.id, X, u)
 
-    retract!(alg.manifold, u, u, k, dt, alg.retraction_method)
+    retract_fused!(alg.manifold, u, u, k, dt, alg.retraction_method)
 
     return integrator.stats.nf += 1
 end
