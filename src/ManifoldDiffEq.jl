@@ -13,7 +13,6 @@ using Accessors: @set
 using SciMLBase: isinplace, promote_tspan, solve!
 
 using SciMLBase:
-    AbstractDiffEqOperator,
     AbstractODEFunction,
     AbstractODEProblem,
     CallbackSet,
@@ -21,6 +20,8 @@ using SciMLBase:
     ODEFunction,
     ReturnCode,
     SciMLBase
+
+using SciMLOperators: AbstractSciMLOperator
 
 import SciMLBase: alg_order, isadaptive, solution_new_retcode, solve
 
