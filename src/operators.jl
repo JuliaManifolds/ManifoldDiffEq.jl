@@ -32,12 +32,12 @@ function (vto::DefaultVectorTransportOperator)(
 end
 
 """
-    FrozenManifoldDiffEqOperator{T<:Number,TM<:AbstractManifold,TF,TVT} <: AbstractDiffEqOperator{T}
+    FrozenManifoldDiffEqOperator{T<:Number,TM<:AbstractManifold,TF,TVT} <: AbstractSciMLOperator{T}
 
 DiffEq operator on manifolds in the frozen vector field formulation.
 """
 struct FrozenManifoldDiffEqOperator{T<:Number,TF,TVT<:AbstractVectorTransportOperator} <:
-       AbstractDiffEqOperator{T}
+       AbstractSciMLOperator{T}
     func::TF
     operator_vector_transport::TVT
 end
@@ -61,11 +61,11 @@ end
 
 
 """
-    LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractDiffEqOperator{T}
+    LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractSciMLOperator{T}
 
 DiffEq operator on manifolds in the Lie group action formulation.
 """
-struct LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractDiffEqOperator{T}
+struct LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractSciMLOperator{T}
     func::TF
 end
 
