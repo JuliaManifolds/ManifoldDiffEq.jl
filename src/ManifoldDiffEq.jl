@@ -107,7 +107,7 @@ Fields:
 * `retcode`: [`ReturnCode`](https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
 """
 struct ManifoldODESolution{
-    T<:Real,
+    T<:Number,
     uType,
     tType,
     rateType,
@@ -137,7 +137,7 @@ function ManifoldODESolution{T}(
     dense,
     stats,
     retcode,
-) where {T<:Real}
+) where {T<:Number}
     return ManifoldODESolution{
         T,
         typeof(u),
@@ -160,7 +160,7 @@ function ManifoldODESolution{T}(
     )
 end
 
-constructorof(::Type{<:ManifoldODESolution{T}}) where {T<:Real} = ManifoldODESolution{T}
+constructorof(::Type{<:ManifoldODESolution{T}}) where {T<:Number} = ManifoldODESolution{T}
 
 function solution_new_retcode(sol::ManifoldODESolution, retcode)
     return @set sol.retcode = retcode
