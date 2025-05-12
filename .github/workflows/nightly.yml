@@ -1,8 +1,5 @@
-name: CI
+name: nightly
 on:
-  push:
-    branches: [main]
-    tags: [v*]
   pull_request:
 
 jobs:
@@ -11,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        julia-version: ["1", "lts"]
+        julia-version: ["pre"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +18,3 @@ jobs:
           arch: x64
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
-      - uses: julia-actions/julia-uploadcodecov@latest
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
