@@ -53,8 +53,8 @@ end
 function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
     X = f(u, p, t)
-    k = diff_group_apply(alg.action, cache.id, X, u)
-    retract_fused!(alg.manifold, u, u, k, dt, alg.retraction_method)
+    k = diff_group_apply(alg.action, cache.id, u, X)
+    retract_fused!(base_manifold(alg.action), u, u, k, dt, alg.retraction_method)
     return integrator.stats.nf += 1
 end
 
@@ -62,7 +62,7 @@ function initialize!(integrator, cache::ManifoldLieEulerCache)
     @unpack t, uprev, f, p, alg = integrator
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst =
-        copy(base_manifold(alg.action), diff_group_apply(alg.action, cache.id, X, uprev))
+        copy(base_manifold(alg.action), diff_group_apply(alg.action, cache.id, uprev, X))
     integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
@@ -140,21 +140,22 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
     action = alg.action
     G = base_lie_group(action)
+    GA = LieAlgebra(G)
     M = base_manifold(action)
     k₁ = dt * f(u, p, t)
     Q₁ = k₁
     u₂ = Q₁ / 2
     k₂ =
         dt * f(
-        retract(M, u, diff_group_apply(action, cache.id, u₂, u), alg.retraction_method),
+        retract(M, u, diff_group_apply(action, cache.id, u, u₂), alg.retraction_method),
         p,
         t + dt / 2,
     )
     Q₂ = k₂ - k₁
-    u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(G, Q₁, Q₂) / 8
+    u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(GA, Q₁, Q₂) / 8
     k₃ =
         dt * f(
-        retract(M, u, diff_group_apply(action, cache.id, u₃, u), alg.retraction_method),
+        retract(M, u, diff_group_apply(action, cache.id, u, u₃), alg.retraction_method),
         p,
         t + dt / 2,
     )
@@ -162,15 +163,15 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₄ = Q₁ + Q₂ + Q₃
     k₄ =
         dt * f(
-        retract(M, u, diff_group_apply(action, cache.id, u₄, u), alg.retraction_method),
+        retract(M, u, diff_group_apply(action, cache.id, u, u₄), alg.retraction_method),
         p,
         t + dt,
     )
     Q₄ = k₄ - 2 * k₂ + k₁
-    v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
+    v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(GA, Q₁, Q₂) / 6 - lie_bracket(GA, Q₁, Q₄) / 12
 
-    X = diff_group_apply(action, cache.id, v, u)
-    retract!(alg.manifold, u, u, X, alg.retraction_method)
+    X = diff_group_apply(action, cache.id, u, v)
+    retract!(base_manifold(alg.action), u, u, X, alg.retraction_method)
 
     return integrator.stats.nf += 1
 end
@@ -181,7 +182,7 @@ function initialize!(integrator, cache::RKMK4Cache)
     M = base_manifold(action)
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst =
-        copy(M, diff_group_apply(action, cache.id, X, uprev))
+        copy(M, diff_group_apply(action, cache.id, uprev, X))
     integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)

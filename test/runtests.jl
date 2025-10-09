@@ -27,7 +27,7 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         end
 
         @test sol1(0.0) ≈ u0
-        @test is_point(M, sol1(1.0))
+        @test is_point(M, sol1(1.0); error = :error)
     end
 
     M = ProductManifold(Sphere(2), Euclidean(3))
@@ -46,7 +46,7 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
         end
 
         @test isapprox(M, sol1(0.0), u0)
-        @test is_point(M, sol1(1.0))
+        @test is_point(M, sol1(1.0); error = :error)
     end
 
 end
@@ -71,7 +71,7 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
         sol1 = solve(prob, alg, dt = 1 / 8)
 
         @test sol1(0.0) ≈ u0
-        @test is_point(M, sol1(1.0))
+        @test is_point(M, sol1(1.0); error = :error)
     end
 
 end
