@@ -74,7 +74,7 @@ isadaptive(::AbstractManifoldDiffEqAlgorithm) = false
 
 """
     AbstractManifoldDiffEqAdaptiveAlgorithm <: AbstractManifoldDiffEqAlgorithm
-    
+
 An abstract subtype of `AbstractManifoldDiffEqAlgorithm` for adaptive algorithms.
 This is the manifold-aware analogue of `OrdinaryDiffEqAdaptiveAlgorithm`.
 
@@ -676,6 +676,7 @@ function solve(
     return integrator.sol
 end
 
+include("manifold_solvers.jl")
 include("frozen_solvers.jl")
 include("lie_solvers.jl")
 

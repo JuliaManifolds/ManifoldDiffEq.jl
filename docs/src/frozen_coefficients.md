@@ -4,7 +4,7 @@ An initial value problem manifold ordinary differential equation in the frozen c
 formulation by Crouch and Grossman, see [CrouchGrossman:1993](@cite).
 
 A frozen coefficients ODE on manifold ``M`` is defined in terms a vector field
-``F\colon (M × P × ℝ) \to T_p M`` where ``p`` is the point given as the third argument to ``F``,
+``F\colon (M × P × ℝ) → T_p M`` where ``p`` is the point given as the third argument to ``F``,
 with an initial value ``y_0`` and ``P`` is the space of constant parameters.
 Frozen coefficients mean that we also have means to transport a vector ``X \in T_p M`` obtained
 from ``F`` to a different point on a manifold or a different time (parameters are assumed
@@ -16,7 +16,7 @@ A solution to this problem is a curve ``y\colon ℝ\to M`` such that ``y(0)=y_0`
 
 The problem is usually studied for manifolds that are Lie groups or homogeneous manifolds, see[CelledoniMarthinsenOwren:2014](@cite).
 
-Note that in this formulation ``s``-stage explicit Runge-Kutta schemes that for ``\mathbb{R}^n`` are defined by equations
+Note that in this formulation ``s``-stage explicit Runge-Kutta schemes that for ``ℝ^n`` are defined by equations
 
 ````math
 \begin{align*}
