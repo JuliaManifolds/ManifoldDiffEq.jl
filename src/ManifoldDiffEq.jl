@@ -1,12 +1,16 @@
 module ManifoldDiffEq
 
-using ManifoldsBase
-using ManifoldsBase: retract_fused, retract_fused!
-using Manifolds
+import ConstructionBase: constructorof
 
 using LinearAlgebra
 
-import ConstructionBase: constructorof
+using LieGroups
+using LieGroups: AbstractLieGroup, GroupAction, base_lie_group, diff_group_apply
+
+using Manifolds
+using ManifoldsBase: retract_fused, retract_fused!, base_manifold
+
+
 
 using Accessors: @set
 

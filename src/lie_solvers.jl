@@ -6,23 +6,21 @@ The manifold Lie-Euler algorithm for problems in the [`LieODEProblemType`](@ref)
 formulation.
 """
 struct ManifoldLieEuler{
-    TM<:AbstractManifold,
     TR<:AbstractRetractionMethod,
-    TG<:AbstractGroupAction,
+    TA<:GroupAction,
 } <: AbstractManifoldDiffEqAlgorithm
-    manifold::TM
     retraction_method::TR
-    action::TG
+    action::TA
 end
 
-alg_order(::ManifoldLieEuler) = 1
+SciMLBase.alg_order(::ManifoldLieEuler) = 1
 
 """
     ManifoldLieEulerCache
 
 Mutable cache for [`ManifoldLieEuler`](@ref).
 """
-struct ManifoldLieEulerCache{TID<:Identity} <: OrdinaryDiffEqMutableCache
+struct ManifoldLieEulerCache{TID<:LieGroups.Identity} <: OrdinaryDiffEqMutableCache
     id::TID
 end
 
@@ -50,18 +48,14 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return ManifoldLieEulerCache(Identity(base_group(alg.action)))
+    return ManifoldLieEulerCache(Identity(base_lie_group(alg.action)))
 end
 
 function perform_step!(integrator, cache::ManifoldLieEulerCache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
-
     X = f(u, p, t)
-    action = alg.action
-    k = apply_diff_group(action, cache.id, X, u)
-
+    k = diff_group_apply(alg.action, cache.id, X, u)
     retract_fused!(alg.manifold, u, u, k, dt, alg.retraction_method)
-
     return integrator.stats.nf += 1
 end
 
@@ -69,11 +63,10 @@ function initialize!(integrator, cache::ManifoldLieEulerCache)
     @unpack t, uprev, f, p, alg = integrator
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst =
-        copy(alg.manifold, apply_diff_group(alg.action, cache.id, X, uprev))
+        copy(base_manifold(alg.action), diff_group_apply(alg.action, cache.id, X, uprev))
     integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
-
     # Avoid undefined entries if k is an array of arrays
     integrator.fsallast = zero.(integrator.fsalfirst)
     return integrator.k[1] = integrator.fsalfirst
@@ -101,9 +94,8 @@ The Butcher tableau is:
 
 For more details see [MuntheKaasOwren:1999](@cite).
 """
-struct RKMK4{TM<:AbstractManifold,TR<:AbstractRetractionMethod,TG<:AbstractGroupAction} <:
+struct RKMK4{TR<:AbstractRetractionMethod,TG<:GroupAction} <:
        AbstractManifoldDiffEqAlgorithm
-    manifold::TM
     retraction_method::TR
     action::TG
 end
@@ -143,21 +135,20 @@ function alg_cache(
     calck,
     ::Val{true},
 )
-    return RKMK4Cache(Identity(base_group(alg.action)))
+    return RKMK4Cache(Identity(base_lie_group(alg.action)))
 end
 
 function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     @unpack t, dt, uprev, u, f, p, alg = integrator
-
     action = alg.action
-    G = base_group(action)
-    M = alg.manifold
+    G = base_lie_group(action)
+    M = base_manifold(action)
     k₁ = dt * f(u, p, t)
     Q₁ = k₁
     u₂ = Q₁ / 2
     k₂ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₂, u), alg.retraction_method),
+            retract(M, u, diff_group_apply(action, cache.id, u₂, u), alg.retraction_method),
             p,
             t + dt / 2,
         )
@@ -165,7 +156,7 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(G, Q₁, Q₂) / 8
     k₃ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₃, u), alg.retraction_method),
+            retract(M, u, diff_group_apply(action, cache.id, u₃, u), alg.retraction_method),
             p,
             t + dt / 2,
         )
@@ -173,14 +164,14 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₄ = Q₁ + Q₂ + Q₃
     k₄ =
         dt * f(
-            retract(M, u, apply_diff_group(action, cache.id, u₄, u), alg.retraction_method),
+            retract(M, u, diff_group_apply(action, cache.id, u₄, u), alg.retraction_method),
             p,
             t + dt,
         )
     Q₄ = k₄ - 2 * k₂ + k₁
     v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
 
-    X = apply_diff_group(action, cache.id, v, u)
+    X = diff_group_apply(action, cache.id, v, u)
     retract!(alg.manifold, u, u, X, alg.retraction_method)
 
     return integrator.stats.nf += 1
@@ -188,13 +179,14 @@ end
 
 function initialize!(integrator, cache::RKMK4Cache)
     @unpack t, uprev, f, p, alg = integrator
+    action = alg.action
+    M = base_manifold(action)
     X = f(uprev, p, t) # Pre-start fsal
     integrator.fsalfirst =
-        copy(alg.manifold, apply_diff_group(alg.action, cache.id, X, uprev))
+        copy(M, diff_group_apply(action, cache.id, X, uprev))
     integrator.stats.nf += 1
     integrator.kshortsize = 1
     integrator.k = typeof(integrator.k)(undef, integrator.kshortsize)
-
     # Avoid undefined entries if k is an array of arrays
     integrator.fsallast = zero.(integrator.fsalfirst)
     return integrator.k[1] = integrator.fsalfirst

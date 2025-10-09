@@ -1,6 +1,6 @@
 using Test
 using ManifoldDiffEq
-using Manifolds
+using Manifolds, LieGroups
 using LinearAlgebra
 using RecursiveArrayTools
 using DiffEqBase
@@ -53,17 +53,17 @@ end
 
 function test_solver_lie(manifold_to_alg; expected_order = nothing)
     expected_order !== nothing && @testset "alg_order" begin
-        action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
+        action = GroupAction(SpecialOrthogonalGroup(3), Euclidean(3), LeftMultiplicationGroupAction())
         alg = manifold_to_alg(Sphere(2), action)
         @test alg_order(alg) == expected_order
     end
 
     @testset "Sphere" begin
         M = Sphere(2)
-        action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
+        action = GroupAction(SpecialOrthogonalGroup(3), Euclidean(3), LeftMultiplicationGroupAction())
 
         A = LieManifoldDiffEqOperator{Float64}() do u, p, t
-            return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, [1.0, 0.0, 0.0]))
+            return hat(SpecialOrthogonalGroup(3), Matrix(I(3)), cross(u, [1.0, 0.0, 0.0]))
         end
         u0 = [0.0, 1.0, 0.0]
         alg = manifold_to_alg(M, action)
@@ -192,7 +192,7 @@ function compare_with_diffeq_lie(manifold_to_alg, tableau)
     k = -0.25
     c = 1
     f(u, p, t) = [-c * u[1] - k * u[2], u[1]]
-    action = TranslationAction(Euclidean(2), TranslationGroup(2))
+    action = GroupAction(TranslationGroup(2), Euclidean(2), AdditionGroupAction())
 
     A = LieManifoldDiffEqOperator{Float64}(f)
     u0 = [-1.0, 1.0]
@@ -232,13 +232,13 @@ end
     compare_with_diffeq_frozen(manifold_to_alg_cg4a, constructCG4a())
 
     manifold_to_alg_lie_euler =
-        (M, action) -> ManifoldDiffEq.ManifoldLieEuler(M, ExponentialRetraction(), action)
+        (M, action) -> ManifoldDiffEq.ManifoldLieEuler(ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_lie_euler; expected_order = 1)
     # not sure why that is broken
     #compare_with_diffeq_lie(manifold_to_alg_lie_euler, constructME())
 
     manifold_to_alg_rkmk4 =
-        (M, action) -> ManifoldDiffEq.RKMK4(M, ExponentialRetraction(), action)
+        (M, action) -> ManifoldDiffEq.RKMK4(ExponentialRetraction(), action)
     test_solver_lie(manifold_to_alg_rkmk4; expected_order = 4)
     compare_with_diffeq_lie(manifold_to_alg_rkmk4, constructRKMK4())
 
