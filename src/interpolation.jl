@@ -1,12 +1,10 @@
-
-
 """
     struct ManifoldInterpolationData end
 
 Inspired by [`OrdinaryDiffEq.InterpolationData`](https://github.com/SciML/OrdinaryDiffEq.jl/blob/41333beef24655d43d370af19b37efd9888179f6/lib/OrdinaryDiffEqCore/src/interp_func.jl#L4).
 The main difference is using on-manifold interpolation instead of the Euclidean one.
 """
-struct ManifoldInterpolationData{F,uType,tType,kType,cacheType,TM}
+struct ManifoldInterpolationData{F, uType, tType, kType, cacheType, TM}
     f::F
     timeseries::uType
     ts::tType
@@ -21,37 +19,37 @@ function (interp::ManifoldInterpolationData)(t, idxs, deriv, p, continuity)
 end
 
 function manifold_linear_interpolation(
-    M::AbstractManifold,
-    Θ,
-    dt,
-    p,
-    q,
-    idxs::Nothing,
-    T::Type{Val{0}},
-)
+        M::AbstractManifold,
+        Θ,
+        dt,
+        p,
+        q,
+        idxs::Nothing,
+        T::Type{Val{0}},
+    )
     return shortest_geodesic(M, p, q, Θ)
 end
 
 function manifold_linear_interpolation(
-    M::AbstractManifold,
-    Θ,
-    dt,
-    ps,
-    qs,
-    idxs,
-    T::Type{Val{0}},
-)
+        M::AbstractManifold,
+        Θ,
+        dt,
+        ps,
+        qs,
+        idxs,
+        T::Type{Val{0}},
+    )
     return map(i -> shortest_geodesic(M, ps[i], qs[i], Θ), idxs)
 end
 
 function ode_interpolation(
-    tval::Number,
-    id::ManifoldInterpolationData,
-    idxs,
-    deriv,
-    p,
-    continuity::Symbol = :left,
-)
+        tval::Number,
+        id::ManifoldInterpolationData,
+        idxs,
+        deriv,
+        p,
+        continuity::Symbol = :left,
+    )
     # implmenented based on `ode_interpolation` from OrdinaryDiffEq.jl
     @unpack ts, timeseries, ks, f, cache = id
     @inbounds tdir = sign(ts[end] - ts[1])

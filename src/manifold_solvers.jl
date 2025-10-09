@@ -1,12 +1,11 @@
-
 """
     ManifoldEuler
 
 The manifold Euler algorithm for problems in the [`ExplicitManifoldODEProblemType`](@ref)
 formulation.
 """
-struct ManifoldEuler{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       AbstractManifoldDiffEqAlgorithm
+struct ManifoldEuler{TM <: AbstractManifold, TR <: AbstractRetractionMethod} <:
+    AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -28,22 +27,22 @@ Cache for [`ManifoldEuler`](@ref).
 struct ManifoldEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
-    alg::ManifoldEuler,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::ManifoldEuler,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return ManifoldEulerCache()
 end
 

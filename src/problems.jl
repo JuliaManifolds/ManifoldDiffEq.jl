@@ -1,4 +1,3 @@
-
 @doc raw"""
     LieODEProblemType
 
@@ -57,8 +56,8 @@ A general problem for ODE problems on Riemannian manifolds.
 * `problem_type` type of problem
 * `manifold` the manifold the vector field is defined on
 """
-struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
-       AbstractODEProblem{uType,tType,isinplace}
+struct ManifoldODEProblem{uType, tType, isinplace, P, F, K, PT, TM} <:
+    AbstractODEProblem{uType, tType, isinplace}
     f::F
     u0::uType
     tspan::tType
@@ -67,14 +66,14 @@ struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
     problem_type::PT
     manifold::TM
     function ManifoldODEProblem{iip}(
-        f::AbstractODEFunction{iip},
-        u0,
-        tspan,
-        manifold::AbstractManifold,
-        p = NullParameters(),
-        problem_type = ExplicitManifoldODEProblemType();
-        kwargs...,
-    ) where {iip}
+            f::AbstractODEFunction{iip},
+            u0,
+            tspan,
+            manifold::AbstractManifold,
+            p = NullParameters(),
+            problem_type = ExplicitManifoldODEProblemType();
+            kwargs...,
+        ) where {iip}
         _tspan = promote_tspan(tspan)
         return new{
             typeof(u0),
@@ -104,13 +103,13 @@ struct ManifoldODEProblem{uType,tType,isinplace,P,F,K,PT,TM} <:
     This is determined automatically, but not inferred.
     """
     function ManifoldODEProblem{iip}(
-        f,
-        u0,
-        tspan,
-        manifold::AbstractManifold,
-        p = NullParameters();
-        kwargs...,
-    ) where {iip}
+            f,
+            u0,
+            tspan,
+            manifold::AbstractManifold,
+            p = NullParameters();
+            kwargs...,
+        ) where {iip}
         return ManifoldODEProblem(
             convert(ODEFunction{iip}, f),
             u0,
@@ -128,54 +127,54 @@ end
 Define an ODE problem from an [`ODEFunction`](@ref).
 """
 function ManifoldODEProblem(
-    f::AbstractODEFunction,
-    u0,
-    tspan,
-    manifold::AbstractManifold,
-    args...;
-    kwargs...,
-)
+        f::AbstractODEFunction,
+        u0,
+        tspan,
+        manifold::AbstractManifold,
+        args...;
+        kwargs...,
+    )
     return ManifoldODEProblem{isinplace(f)}(f, u0, tspan, manifold, args...; kwargs...)
 end
 
 function ManifoldODEProblem(
-    f,
-    u0,
-    tspan,
-    manifold::AbstractManifold,
-    p = NullParameters();
-    kwargs...,
-)
+        f,
+        u0,
+        tspan,
+        manifold::AbstractManifold,
+        p = NullParameters();
+        kwargs...,
+    )
     return ManifoldODEProblem(ODEFunction(f), u0, tspan, manifold, p; kwargs...)
 end
 
 function ode_determine_initdt(
-    u0,
-    t,
-    tdir,
-    dtmax,
-    abstol,
-    reltol,
-    internalnorm,
-    prob::ManifoldODEProblem{uType,tType},
-    integrator,
-) where {tType,uType}
+        u0,
+        t,
+        tdir,
+        dtmax,
+        abstol,
+        reltol,
+        internalnorm,
+        prob::ManifoldODEProblem{uType, tType},
+        integrator,
+    ) where {tType, uType}
     _tType = number_eltype(tType)
     oneunit_tType = oneunit(_tType)
     return convert(_tType, oneunit_tType * 1 // 10^(6))
 end
 
 function build_solution(
-    prob::ManifoldODEProblem,
-    alg,
-    t,
-    u;
-    dense = false,
-    k = nothing,
-    manifold_interp::ManifoldInterpolationData,
-    retcode = ReturnCode.Default,
-    stats = nothing,
-)
+        prob::ManifoldODEProblem,
+        alg,
+        t,
+        u;
+        dense = false,
+        k = nothing,
+        manifold_interp::ManifoldInterpolationData,
+        retcode = ReturnCode.Default,
+        stats = nothing,
+    )
     T = eltype(eltype(u))
     return ManifoldODESolution{T}(
         u,

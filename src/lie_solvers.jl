@@ -1,4 +1,3 @@
-
 """
     ManifoldLieEuler
 
@@ -6,9 +5,9 @@ The manifold Lie-Euler algorithm for problems in the [`LieODEProblemType`](@ref)
 formulation.
 """
 struct ManifoldLieEuler{
-    TR<:AbstractRetractionMethod,
-    TA<:GroupAction,
-} <: AbstractManifoldDiffEqAlgorithm
+        TR <: AbstractRetractionMethod,
+        TA <: GroupAction,
+    } <: AbstractManifoldDiffEqAlgorithm
     retraction_method::TR
     action::TA
 end
@@ -20,7 +19,7 @@ SciMLBase.alg_order(::ManifoldLieEuler) = 1
 
 Mutable cache for [`ManifoldLieEuler`](@ref).
 """
-struct ManifoldLieEulerCache{TID<:LieGroups.Identity} <: OrdinaryDiffEqMutableCache
+struct ManifoldLieEulerCache{TID <: LieGroups.Identity} <: OrdinaryDiffEqMutableCache
     id::TID
 end
 
@@ -32,22 +31,22 @@ Constant cache for [`ManifoldLieEuler`](@ref).
 struct ManifoldLieEulerConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
-    alg::ManifoldLieEuler,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::ManifoldLieEuler,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return ManifoldLieEulerCache(Identity(base_lie_group(alg.action)))
 end
 
@@ -73,7 +72,6 @@ function initialize!(integrator, cache::ManifoldLieEulerCache)
 end
 
 
-
 @doc raw"""
     RKMK4
 
@@ -94,8 +92,8 @@ The Butcher tableau is:
 
 For more details see [MuntheKaasOwren:1999](@cite).
 """
-struct RKMK4{TR<:AbstractRetractionMethod,TG<:GroupAction} <:
-       AbstractManifoldDiffEqAlgorithm
+struct RKMK4{TR <: AbstractRetractionMethod, TG <: GroupAction} <:
+    AbstractManifoldDiffEqAlgorithm
     retraction_method::TR
     action::TG
 end
@@ -107,7 +105,7 @@ alg_order(::RKMK4) = 4
 
 Mutable cache for [`RKMK4`](@ref).
 """
-struct RKMK4Cache{TID<:Identity} <: OrdinaryDiffEqMutableCache
+struct RKMK4Cache{TID <: Identity} <: OrdinaryDiffEqMutableCache
     id::TID
 end
 
@@ -119,22 +117,22 @@ Constant cache for [`RKMK4`](@ref).
 struct RKMK4ConstantCache <: OrdinaryDiffEqConstantCache end
 
 function alg_cache(
-    alg::RKMK4,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::RKMK4,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return RKMK4Cache(Identity(base_lie_group(alg.action)))
 end
 
@@ -148,26 +146,26 @@ function perform_step!(integrator, cache::RKMK4Cache, repeat_step = false)
     u₂ = Q₁ / 2
     k₂ =
         dt * f(
-            retract(M, u, diff_group_apply(action, cache.id, u₂, u), alg.retraction_method),
-            p,
-            t + dt / 2,
-        )
+        retract(M, u, diff_group_apply(action, cache.id, u₂, u), alg.retraction_method),
+        p,
+        t + dt / 2,
+    )
     Q₂ = k₂ - k₁
     u₃ = Q₁ / 2 + Q₂ / 2 - lie_bracket(G, Q₁, Q₂) / 8
     k₃ =
         dt * f(
-            retract(M, u, diff_group_apply(action, cache.id, u₃, u), alg.retraction_method),
-            p,
-            t + dt / 2,
-        )
+        retract(M, u, diff_group_apply(action, cache.id, u₃, u), alg.retraction_method),
+        p,
+        t + dt / 2,
+    )
     Q₃ = k₃ - k₂
     u₄ = Q₁ + Q₂ + Q₃
     k₄ =
         dt * f(
-            retract(M, u, diff_group_apply(action, cache.id, u₄, u), alg.retraction_method),
-            p,
-            t + dt,
-        )
+        retract(M, u, diff_group_apply(action, cache.id, u₄, u), alg.retraction_method),
+        p,
+        t + dt,
+    )
     Q₄ = k₄ - 2 * k₂ + k₁
     v = Q₁ + Q₂ + Q₃ / 3 + Q₄ / 6 - lie_bracket(G, Q₁, Q₂) / 6 - lie_bracket(G, Q₁, Q₄) / 12
 

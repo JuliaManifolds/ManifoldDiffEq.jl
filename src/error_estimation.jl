@@ -1,4 +1,3 @@
-
 """
     calculate_eest(M::AbstractManifold, utilde, uprev, u, abstol, reltol, internalnorm, t)
 
@@ -15,15 +14,15 @@ Estimate error of a solution of an ODE on manifold `M`.
 - `t` -- time at which the error is estimated.
 """
 function calculate_eest(
-    M::AbstractManifold,
-    utilde,
-    uprev,
-    u,
-    abstol,
-    reltol,
-    internalnorm,
-    t,
-)
+        M::AbstractManifold,
+        utilde,
+        uprev,
+        u,
+        abstol,
+        reltol,
+        internalnorm,
+        t,
+    )
     reltol_thing = max(reltol_norm(M, u), reltol_norm(M, uprev))
     return distance(M, u, utilde) / (abstol + reltol_thing * reltol)
 end

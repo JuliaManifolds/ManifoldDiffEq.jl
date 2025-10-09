@@ -32,7 +32,7 @@ function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive 
 
     M = ProductManifold(Sphere(2), Euclidean(3))
     alg = manifold_to_alg(M)
-    @testset "$alg on product manifold" begin
+    return @testset "$alg on product manifold" begin
 
         A = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
             return ArrayPartition(cross(u.x[1], [1.0, 0.0, 0.0]), u.x[2])
@@ -58,7 +58,7 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
         @test alg_order(alg) == expected_order
     end
 
-    @testset "Sphere" begin
+    return @testset "Sphere" begin
         M = Sphere(2)
         action = GroupAction(SpecialOrthogonalGroup(3), Euclidean(3), LeftMultiplicationGroupAction())
 
@@ -90,7 +90,7 @@ end
 function constructCG2(T::Type = Float64)
     A = [
         0 0
-        1//2 0
+        1 // 2 0
     ]
     c = [0, 1 // 2]
     α = [0, 1]
@@ -103,8 +103,8 @@ end
 function constructCG3(T::Type = Float64)
     A = [
         0 0 0
-        3//4 0 0
-        119//216 17/108 0
+        3 // 4 0 0
+        119 // 216 17 / 108 0
     ]
     c = [0, 3 // 4, 17 // 24]
     α = [13 // 51, -2 // 3, 24 // 17]
@@ -130,8 +130,8 @@ function constructCG4a(T::Type = Float64)
     a53 = 1.3918565724203246
     a54 = -1.1092979392113465
     b1 = 0.1370831520630755
-    b2 = -0.0183698531564020
-    b3 = 0.7397813985370780
+    b2 = -0.018369853156402
+    b3 = 0.739781398537078
     b4 = -0.1907142565505889
     b5 = 0.3322195591068374
 
@@ -153,8 +153,8 @@ end
 function constructRKMK4(T::Type = Float64)
     A = [
         0 0 0 0
-        1//2 0 0 0
-        0 1//2 0 0
+        1 // 2 0 0 0
+        0 1 // 2 0 0
         0 0 1 0
     ]
     c = [0, 1 // 2, 1 // 2, 1]
@@ -183,7 +183,7 @@ function compare_with_diffeq_frozen(manifold_to_alg, tableau)
     prob_diffeq = ODEProblem(A, u0, tspan)
     sol_diffeq = solve(prob_diffeq, alg_diffeq; dt = dt, adaptive = false)
 
-    @test isapprox(sol_frozen.u, sol_diffeq.u)
+    return @test isapprox(sol_frozen.u, sol_diffeq.u)
 end
 
 function compare_with_diffeq_lie(manifold_to_alg, tableau)
@@ -206,7 +206,7 @@ function compare_with_diffeq_lie(manifold_to_alg, tableau)
     prob_diffeq = ODEProblem(A, u0, tspan)
     sol_diffeq = solve(prob_diffeq, alg_diffeq; dt = dt, adaptive = false)
 
-    @test isapprox(sol_lie.u, sol_diffeq.u)
+    return @test isapprox(sol_lie.u, sol_diffeq.u)
 end
 
 

@@ -1,4 +1,3 @@
-
 @doc raw"""
     CG2
 
@@ -15,8 +14,8 @@ The Butcher tableau is identical to the Euclidean RK2:
 \end{array}
 ```
 """
-struct CG2{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       AbstractManifoldDiffEqAlgorithm
+struct CG2{TM <: AbstractManifold, TR <: AbstractRetractionMethod} <:
+    AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -28,29 +27,29 @@ alg_order(::CG2) = 2
 
 Mutable cache for [`CG2`](@ref).
 """
-struct CG2Cache{TX,TK2u} <: OrdinaryDiffEqMutableCache
+struct CG2Cache{TX, TK2u} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2u::TK2u
     X2::TX
 end
 
 function alg_cache(
-    alg::CG2,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::CG2,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return CG2Cache(allocate(rate_prototype), allocate(u), allocate(rate_prototype))
 end
 
@@ -82,7 +81,6 @@ function perform_step!(integrator, cache::CG2Cache, repeat_step = false)
 end
 
 
-
 @doc raw"""
     CG2_3
 
@@ -102,8 +100,8 @@ The Butcher tableau reads (see tableau (5) of [EngøMarthinsen:1998](@cite)):
 ```
 The last row is used for error estimation.
 """
-struct CG2_3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       AbstractManifoldDiffEqAdaptiveAlgorithm
+struct CG2_3{TM <: AbstractManifold, TR <: AbstractRetractionMethod} <:
+    AbstractManifoldDiffEqAdaptiveAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -115,7 +113,7 @@ alg_order(::CG2_3) = 2
 
 Cache for [`CG2_3`](@ref).
 """
-struct CG2_3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG2_3Cache{TX, TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
@@ -125,22 +123,22 @@ struct CG2_3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
 end
 
 function alg_cache(
-    alg::CG2_3,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::CG2_3,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return CG2_3Cache(
         allocate(rate_prototype),
         allocate(rate_prototype),
@@ -224,7 +222,6 @@ function perform_step!(integrator, cache::CG2_3Cache, repeat_step = false)
 end
 
 
-
 @doc raw"""
     CG3
 
@@ -242,8 +239,8 @@ A Crouch-Grossmann algorithm of second order for problems in the
 ```
 
 """
-struct CG3{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       AbstractManifoldDiffEqAlgorithm
+struct CG3{TM <: AbstractManifold, TR <: AbstractRetractionMethod} <:
+    AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -255,7 +252,7 @@ alg_order(::CG3) = 3
 
 Mutable cache for [`CG3`](@ref).
 """
-struct CG3Cache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG3Cache{TX, TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
@@ -265,22 +262,22 @@ end
 
 
 function alg_cache(
-    alg::CG3,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::CG3,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return CG3Cache(
         allocate(rate_prototype),
         allocate(rate_prototype),
@@ -333,7 +330,6 @@ function initialize!(integrator, ::CG3Cache)
 end
 
 
-
 @doc raw"""
     CG4a
 
@@ -341,8 +337,8 @@ A Crouch-Grossmann algorithm of second order for problems in the
 [`ExplicitManifoldODEProblemType`](@ref) formulation. See coefficients from
 Example 1 of [JackiewiczMarthinsenOwren:2000](@cite).
 """
-struct CG4a{TM<:AbstractManifold,TR<:AbstractRetractionMethod} <:
-       AbstractManifoldDiffEqAlgorithm
+struct CG4a{TM <: AbstractManifold, TR <: AbstractRetractionMethod} <:
+    AbstractManifoldDiffEqAlgorithm
     manifold::TM
     retraction_method::TR
 end
@@ -354,7 +350,7 @@ alg_order(::CG4a) = 4
 
 Mutable cache for [`CG4a`](@ref).
 """
-struct CG4aCache{TX,TP} <: OrdinaryDiffEqMutableCache
+struct CG4aCache{TX, TP} <: OrdinaryDiffEqMutableCache
     X1::TX
     X2::TX
     X3::TX
@@ -368,22 +364,22 @@ end
 
 
 function alg_cache(
-    alg::CG4a,
-    u,
-    rate_prototype,
-    uEltypeNoUnits,
-    uBottomEltypeNoUnits,
-    tTypeNoUnits,
-    uprev,
-    uprev2,
-    f,
-    t,
-    dt,
-    reltol,
-    p,
-    calck,
-    ::Val{true},
-)
+        alg::CG4a,
+        u,
+        rate_prototype,
+        uEltypeNoUnits,
+        uBottomEltypeNoUnits,
+        tTypeNoUnits,
+        uprev,
+        uprev2,
+        f,
+        t,
+        dt,
+        reltol,
+        p,
+        calck,
+        ::Val{true},
+    )
     return CG4aCache(
         allocate(rate_prototype),
         allocate(rate_prototype),
@@ -419,8 +415,8 @@ function perform_step!(integrator, cache::CG4aCache, repeat_step = false)
     a53h = Tdt(1.3918565724203246) * dt
     a54h = Tdt(-1.1092979392113465) * dt
     b1 = Tdt(0.1370831520630755) * dt
-    b2 = Tdt(-0.0183698531564020) * dt
-    b3 = Tdt(0.7397813985370780) * dt
+    b2 = Tdt(-0.018369853156402) * dt
+    b3 = Tdt(0.739781398537078) * dt
     b4 = Tdt(-0.1907142565505889) * dt
     b5 = Tdt(0.3322195591068374) * dt
 

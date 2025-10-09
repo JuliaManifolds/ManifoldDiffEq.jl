@@ -1,4 +1,3 @@
-
 """
     AbstractVectorTransportOperator
 
@@ -6,8 +5,8 @@ Abstract type for vector transport operators in the frozen coefficients formulat
 """
 abstract type AbstractVectorTransportOperator end
 
-struct DefaultVectorTransportOperator{TVT<:AbstractVectorTransportMethod} <:
-       AbstractVectorTransportOperator
+struct DefaultVectorTransportOperator{TVT <: AbstractVectorTransportMethod} <:
+    AbstractVectorTransportOperator
     vtm::TVT
 end
 
@@ -19,14 +18,14 @@ In the frozen coefficient formulation, transport tangent vector `X` such that
 of `f(q, params, t_to)`.
 """
 function (vto::DefaultVectorTransportOperator)(
-    M::AbstractManifold,
-    p,
-    X,
-    q,
-    params,
-    t_from,
-    t_to,
-)
+        M::AbstractManifold,
+        p,
+        X,
+        q,
+        params,
+        t_from,
+        t_to,
+    )
     # default implementation, may be customized as needed.
     return vector_transport_to(M, p, X, q)
 end
@@ -36,16 +35,16 @@ end
 
 DiffEq operator on manifolds in the frozen vector field formulation.
 """
-struct FrozenManifoldDiffEqOperator{T<:Number,TF,TVT<:AbstractVectorTransportOperator} <:
-       AbstractSciMLOperator{T}
+struct FrozenManifoldDiffEqOperator{T <: Number, TF, TVT <: AbstractVectorTransportOperator} <:
+    AbstractSciMLOperator{T}
     func::TF
     operator_vector_transport::TVT
 end
 
-function FrozenManifoldDiffEqOperator{T}(f, ovt) where {T<:Number}
-    return FrozenManifoldDiffEqOperator{T,typeof(f),typeof(ovt)}(f, ovt)
+function FrozenManifoldDiffEqOperator{T}(f, ovt) where {T <: Number}
+    return FrozenManifoldDiffEqOperator{T, typeof(f), typeof(ovt)}(f, ovt)
 end
-function FrozenManifoldDiffEqOperator{T}(f) where {T<:Number}
+function FrozenManifoldDiffEqOperator{T}(f) where {T <: Number}
     return FrozenManifoldDiffEqOperator{T}(
         f,
         DefaultVectorTransportOperator(ParallelTransport()),
@@ -65,12 +64,12 @@ end
 
 DiffEq operator on manifolds in the Lie group action formulation.
 """
-struct LieManifoldDiffEqOperator{T<:Number,TF} <: AbstractSciMLOperator{T}
+struct LieManifoldDiffEqOperator{T <: Number, TF} <: AbstractSciMLOperator{T}
     func::TF
 end
 
-function LieManifoldDiffEqOperator{T}(f) where {T<:Number}
-    return LieManifoldDiffEqOperator{T,typeof(f)}(f)
+function LieManifoldDiffEqOperator{T}(f) where {T <: Number}
+    return LieManifoldDiffEqOperator{T, typeof(f)}(f)
 end
 
 function (L::LieManifoldDiffEqOperator)(du, u, p, t)

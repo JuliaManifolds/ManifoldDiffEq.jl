@@ -11,7 +11,6 @@ using Manifolds
 using ManifoldsBase: retract_fused, retract_fused!, base_manifold
 
 
-
 using Accessors: @set
 
 using SciMLBase: isinplace, promote_tspan, solve!
@@ -111,15 +110,15 @@ Fields:
 * `retcode`: [`ReturnCode`](https://docs.sciml.ai/SciMLBase/stable/interfaces/Solutions/#retcodes) of the solution.
 """
 struct ManifoldODESolution{
-    T<:Number,
-    uType,
-    tType,
-    rateType,
-    P,
-    A<:AbstractManifoldDiffEqAlgorithm,
-    IType,
-    S,
-}
+        T <: Number,
+        uType,
+        tType,
+        rateType,
+        P,
+        A <: AbstractManifoldDiffEqAlgorithm,
+        IType,
+        S,
+    }
     u::uType
     t::tType
     k::rateType
@@ -132,16 +131,16 @@ struct ManifoldODESolution{
 end
 
 function ManifoldODESolution{T}(
-    u,
-    t,
-    k,
-    prob,
-    alg,
-    interp,
-    dense,
-    stats,
-    retcode,
-) where {T<:Number}
+        u,
+        t,
+        k,
+        prob,
+        alg,
+        interp,
+        dense,
+        stats,
+        retcode,
+    ) where {T <: Number}
     return ManifoldODESolution{
         T,
         typeof(u),
@@ -164,27 +163,27 @@ function ManifoldODESolution{T}(
     )
 end
 
-constructorof(::Type{<:ManifoldODESolution{T}}) where {T<:Number} = ManifoldODESolution{T}
+constructorof(::Type{<:ManifoldODESolution{T}}) where {T <: Number} = ManifoldODESolution{T}
 
 function solution_new_retcode(sol::ManifoldODESolution, retcode)
     return @set sol.retcode = retcode
 end
 
 function (sol::ManifoldODESolution)(
-    t,
-    ::Type{deriv} = Val{0};
-    idxs = nothing,
-    continuity = :left,
-) where {deriv}
+        t,
+        ::Type{deriv} = Val{0};
+        idxs = nothing,
+        continuity = :left,
+    ) where {deriv}
     return sol(t, deriv, idxs, continuity)
 end
 
 function (sol::ManifoldODESolution)(
-    t::Number,
-    ::Type{deriv},
-    idxs::Nothing,
-    continuity,
-) where {deriv}
+        t::Number,
+        ::Type{deriv},
+        idxs::Nothing,
+        continuity,
+    ) where {deriv}
     return sol.interp(t, idxs, deriv, sol.prob.p, continuity)
 end
 
@@ -202,63 +201,63 @@ struct DefaultInit end
 # Adapted from OrdinaryDiffEq.jl:
 # https://github.com/SciML/OrdinaryDiffEq.jl/blob/1eef9db17600766bb71e7dce0cb105ae5f99b2a5/lib/OrdinaryDiffEqCore/src/solve.jl#L11
 function SciMLBase.__init(
-    prob::ManifoldODEProblem,
-    alg::AbstractManifoldDiffEqAlgorithm,
-    timeseries_init = (),
-    ts_init = (),
-    ks_init = (),
-    recompile::Type{Val{recompile_flag}} = Val{true};
-    saveat = (),
-    tstops = (),
-    d_discontinuities = (),
-    save_everystep = isempty(saveat),
-    save_on = true,
-    save_start = save_everystep ||
-                     isempty(saveat) ||
-                     saveat isa Number ||
-                     prob.tspan[1] in saveat,
-    save_end = nothing,
-    callback = nothing,
-    dense::Bool = save_everystep && isempty(saveat),
-    calck = (callback !== nothing && callback !== CallbackSet()) ||
-                (dense) ||
-                !isempty(saveat), # and no dense output
-    dt = eltype(prob.tspan)(0),
-    dtmin = eltype(prob.tspan)(0),
-    dtmax = eltype(prob.tspan)((prob.tspan[end] - prob.tspan[1])),
-    force_dtmin = false,
-    adaptive = isadaptive(alg),
-    gamma = gamma_default(alg),
-    abstol::Union{Nothing,Real} = nothing,
-    reltol::Union{Nothing,Real} = nothing,
-    qmin = qmin_default(alg),
-    qmax = qmax_default(alg),
-    qsteady_min = qsteady_min_default(alg),
-    qsteady_max = qsteady_max_default(alg),
-    qoldinit = isadaptive(alg) ? 1 // 10^4 : 0,
-    controller = nothing,
-    failfactor = 2,
-    maxiters::Int = isadaptive(alg) ? 1000000 : typemax(Int),
-    internalopnorm = opnorm,
-    isoutofdomain = ODE_DEFAULT_ISOUTOFDOMAIN,
-    unstable_check = ODE_DEFAULT_UNSTABLE_CHECK,
-    verbose = true,
-    timeseries_errors = true,
-    dense_errors = false,
-    advance_to_tstop = false,
-    stop_at_next_tstop = false,
-    initialize_save = true,
-    progress = false,
-    progress_steps = 1000,
-    progress_name = "ODE",
-    progress_message = ODE_DEFAULT_PROG_MESSAGE,
-    progress_id = :OrdinaryDiffEq,
-    userdata = nothing,
-    allow_extrapolation = alg_extrapolates(alg),
-    initialize_integrator = true,
-    initializealg = DefaultInit(),
-    kwargs...,
-) where {recompile_flag}
+        prob::ManifoldODEProblem,
+        alg::AbstractManifoldDiffEqAlgorithm,
+        timeseries_init = (),
+        ts_init = (),
+        ks_init = (),
+        recompile::Type{Val{recompile_flag}} = Val{true};
+        saveat = (),
+        tstops = (),
+        d_discontinuities = (),
+        save_everystep = isempty(saveat),
+        save_on = true,
+        save_start = save_everystep ||
+            isempty(saveat) ||
+            saveat isa Number ||
+            prob.tspan[1] in saveat,
+        save_end = nothing,
+        callback = nothing,
+        dense::Bool = save_everystep && isempty(saveat),
+        calck = (callback !== nothing && callback !== CallbackSet()) ||
+            (dense) ||
+            !isempty(saveat), # and no dense output
+        dt = eltype(prob.tspan)(0),
+        dtmin = eltype(prob.tspan)(0),
+        dtmax = eltype(prob.tspan)((prob.tspan[end] - prob.tspan[1])),
+        force_dtmin = false,
+        adaptive = isadaptive(alg),
+        gamma = gamma_default(alg),
+        abstol::Union{Nothing, Real} = nothing,
+        reltol::Union{Nothing, Real} = nothing,
+        qmin = qmin_default(alg),
+        qmax = qmax_default(alg),
+        qsteady_min = qsteady_min_default(alg),
+        qsteady_max = qsteady_max_default(alg),
+        qoldinit = isadaptive(alg) ? 1 // 10^4 : 0,
+        controller = nothing,
+        failfactor = 2,
+        maxiters::Int = isadaptive(alg) ? 1000000 : typemax(Int),
+        internalopnorm = opnorm,
+        isoutofdomain = ODE_DEFAULT_ISOUTOFDOMAIN,
+        unstable_check = ODE_DEFAULT_UNSTABLE_CHECK,
+        verbose = true,
+        timeseries_errors = true,
+        dense_errors = false,
+        advance_to_tstop = false,
+        stop_at_next_tstop = false,
+        initialize_save = true,
+        progress = false,
+        progress_steps = 1000,
+        progress_name = "ODE",
+        progress_message = ODE_DEFAULT_PROG_MESSAGE,
+        progress_id = :OrdinaryDiffEq,
+        userdata = nothing,
+        allow_extrapolation = alg_extrapolates(alg),
+        initialize_integrator = true,
+        initializealg = DefaultInit(),
+        kwargs...,
+    ) where {recompile_flag}
     isdae = false
 
     if !isempty(saveat) && dense
@@ -309,14 +308,14 @@ function SciMLBase.__init(
     # dtmin is all abs => does not care about sign already.
 
     if isinplace(prob) &&
-       u isa AbstractArray &&
-       eltype(u) <: Number &&
-       uBottomEltypeNoUnits == uBottomEltype &&
-       tType == tTypeNoUnits # Could this be more efficient for other arrays?
+            u isa AbstractArray &&
+            eltype(u) <: Number &&
+            uBottomEltypeNoUnits == uBottomEltype &&
+            tType == tTypeNoUnits # Could this be more efficient for other arrays?
         rate_prototype = copy(M, u)
     else
         if (uBottomEltypeNoUnits == uBottomEltype && tType == tTypeNoUnits) ||
-           eltype(u) <: Enum
+                eltype(u) <: Enum
             rate_prototype = u
         else # has units!
             rate_prototype = u / oneunit(tType)
@@ -665,13 +664,13 @@ function SciMLBase.__init(
 end
 
 function solve(
-    prob::ManifoldODEProblem,
-    alg::AbstractManifoldDiffEqAlgorithm,
-    args...;
-    u0 = nothing,
-    p = nothing,
-    kwargs...,
-)
+        prob::ManifoldODEProblem,
+        alg::AbstractManifoldDiffEqAlgorithm,
+        args...;
+        u0 = nothing,
+        p = nothing,
+        kwargs...,
+    )
     u0 = u0 !== nothing ? u0 : prob.u0
     p = p !== nothing ? p : prob.p
 
