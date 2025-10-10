@@ -60,7 +60,7 @@ function test_solver_lie(manifold_to_alg; expected_order = nothing)
 
     return @testset "Sphere" begin
         M = Sphere(2)
-        action = GroupAction(SpecialOrthogonalGroup(3), Euclidean(3), LeftMultiplicationGroupAction())
+        action = GroupAction(SpecialOrthogonalGroup(3), M, LeftMultiplicationGroupAction())
 
         A = LieManifoldDiffEqOperator{Float64}() do u, p, t
             return hat(SpecialOrthogonalGroup(3), Matrix(I(3)), cross(u, [1.0, 0.0, 0.0]))
