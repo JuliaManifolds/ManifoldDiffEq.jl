@@ -3,7 +3,7 @@
 #
 
 using Plots, Manifolds, ManifoldsBase, ManifoldDiffEq, LieGroups, Documenter, PythonPlot
-using DocumenterCitations
+using DocumenterCitations, DocumenterInterLinks
 
 ENV["GKSwstype"] = "100"
 
