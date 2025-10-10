@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Bumped dependencies of all JuliaManifolds ecosystem packages to be consistent with ManifoldsBase.jl 2.0 and Manifolds.jl 0.11
+* `ManifoldLieEuler` and `RKMK4` no longer store the manifold separately from the action, and instead use the manifold used in the action.
 
 ## [0.2.3] - 2025-05-11
 
