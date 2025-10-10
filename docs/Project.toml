@@ -19,4 +19,4 @@ ManifoldsBase = "2"
 Plots = "1"
 
 [sources]
-ManifoldsBase = { path = ".." }
+ManifoldDiffEq = { path = ".." }
