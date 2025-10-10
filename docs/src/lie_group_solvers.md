@@ -7,12 +7,16 @@ where ``𝔤`` is the Lie algebra of a Lie group ``G`` acting on ``M``, with an
 initial value ``y_0`` and ``P`` is the space of constant parameters. A solution to this
 problem is a curve ``y\colon ℝ\to M`` such that ``y(0)=y_0`` and for each ``t \in [0, T]`` we have
 ``D_t y(t) = f(y(t), p, t)\circ y(t)``, where the ``\circ`` is defined as
+
 ````math
 X\circ m = \frac{d}{dt}\vert_{t=0} \exp(tZ)\cdot m
 ````
+
 and ``\cdot`` is the group action of ``G`` on ``M``.
 
 The Lie group ``G`` must act transitively on ``M``, that is for each pair of points ``p, q`` on ``M`` there is an element ``a \in G`` such that ``a\cdot p = q``. See for example [CelledoniMarthinsenOwren:2014](@cite) for details.
+
+The Lie group is represented by the type [`LieGroups.LieGroup`](@extref), and its action by [`LieGroups.GroupAction`](@extref).
 
 ```@autodocs
 Modules = [ManifoldDiffEq]

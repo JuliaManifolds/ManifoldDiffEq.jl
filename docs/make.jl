@@ -2,15 +2,16 @@
 #
 #
 
-using Plots, Manifolds, ManifoldsBase, ManifoldDiffEq, Documenter, PythonPlot
+using Plots, Manifolds, ManifoldsBase, ManifoldDiffEq, LieGroups, Documenter, PythonPlot
 using DocumenterCitations
 
 ENV["GKSwstype"] = "100"
 
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
-    "ManifoldsBase" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
+    "Manifolds" => ("https://juliamanifolds.github.io/Manifolds.jl/stable/"),
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
+    "LieGroups" => ("https://juliamanifolds.github.io/LieGroups.jl/stable/"),
 )
 
 makedocs(
