@@ -60,8 +60,8 @@ function perform_step!(integrator, ::ManifoldEulerCache, repeat_step = false)
         integrator.dt,
         alg.retraction_method,
     )
-
-    return integrator.stats.nf += 1
+    integrator.stats.nf += 1
+    return integrator
 end
 
 function initialize!(integrator, ::ManifoldEulerCache)

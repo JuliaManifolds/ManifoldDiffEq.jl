@@ -11,6 +11,8 @@ using LinearAlgebra
 using SparseArrays
 using RecursiveArrayTools: ArrayPartition
 using TensorToolbox
+using OrdinaryDiffEq
+
 
 using Plots
 # include("MyManifoldIntegrator.jl")
@@ -24,7 +26,7 @@ if case=="CP"
     V = (n, n, n)
     M = CPTensor(V, r)
     tspan = (0.0, 10.0)
-    dt = 0.1
+    dt = 0.001
 end
 
 if case=="TT"
@@ -80,7 +82,7 @@ for i in 1:n
                 1 / (1 + (0.5 - i / n)^2 + (0.5 - j / n)^2 + (0.5 - k / n)^2) *
                 # 1 / (1 + (i / n) * (j / n) * (k / n) / 2) *
                 # sin((i / n) * (j / n) * (k / n) * pi) *
-                # rand() * 
+                # rand() *
                 (i != 1) * (i != n) * (j != 1) * (j != n) * (k != 1) * (k != n) # Boundary conditions
         end
     end
@@ -110,7 +112,7 @@ solution = solve(problem, algorithm, dt=dt)
 
 ### Full rank ODE ###
 
-using OrdinaryDiffEq
+
 source = ones(V)
 source[1, :, :] .= 0; source[end, :, :] .= 0;
 source[:, 1, :] .= 0; source[:, end, :] .= 0;
