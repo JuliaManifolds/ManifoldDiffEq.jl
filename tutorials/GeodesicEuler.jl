@@ -1,10 +1,6 @@
 using Manifolds
 using ManifoldDiffEq
 using ManifoldsBase
-import Manifolds.apply,
-    Manifolds.apply_diff,
-    Manifolds.apply_diff_group,
-    Manifolds.base_group
 
 using Random; Random.seed!(1)
 using LinearAlgebra
