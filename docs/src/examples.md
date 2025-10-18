@@ -83,7 +83,7 @@ A_frozen = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
 end
 prob_frozen = ManifoldODEProblem(A_frozen, u0, tspan, S2)
 
-action = GroupAction(LeftMultiplicationGroupAction(), SpecialOrthogonalGroup(3), Euclidean(3))
+action = GroupAction(LeftMultiplicationGroupAction(), SpecialOrthogonalGroup(3), S2)
 alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(ExponentialRetraction(), action)
 alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(ExponentialRetraction(), action)
 
