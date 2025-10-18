@@ -27,7 +27,7 @@ We solve the ODE system on the sphere ``\mathbb S^2`` given by
 ```
 
 ```julia
-using ManifoldDiffEq, Manifolds
+using ManifoldDiffEq, Manifolds, LieGroups
 using GLMakie, LinearAlgebra, Colors
 
 n = 25
@@ -59,6 +59,7 @@ arr = GLMakie.arrows!(
 )
 save("docs/src/assets/img/first_example_vector_field.png", f)
 ```
+
 which looks like
 
 ![The ODE illustrated as a tangent vector field](assets/img/first_example_vector_field.png)
@@ -73,7 +74,7 @@ u0 = [0.0, sqrt(9/10), sqrt(1/10)]
 tspan = (0, 20.0)
 
 A_lie = LieManifoldDiffEqOperator{Float64}() do u, p, t
-    return hat(SpecialOrthogonal(3), Matrix(I(3)), cross(u, f2(u...)))
+    return hat(SpecialOrthogonalGroup(3), Matrix(I(3)), cross(u, f2(u...)))
 end
 prob_lie = ManifoldODEProblem(A_lie, u0, tspan, S2)
 
@@ -82,9 +83,9 @@ A_frozen = FrozenManifoldDiffEqOperator{Float64}() do u, p, t
 end
 prob_frozen = ManifoldODEProblem(A_frozen, u0, tspan, S2)
 
-action = RotationAction(Euclidean(3), SpecialOrthogonal(3))
-alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(S2, ExponentialRetraction(), action)
-alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(S2, ExponentialRetraction(), action)
+action = GroupAction(LeftMultiplicationGroupAction(), SpecialOrthogonalGroup(3), S2)
+alg_lie_euler = ManifoldDiffEq.ManifoldLieEuler(ExponentialRetraction(), action)
+alg_lie_rkmk4 = ManifoldDiffEq.RKMK4(ExponentialRetraction(), action)
 
 alg_manifold_euler = ManifoldDiffEq.ManifoldEuler(S2, ExponentialRetraction())
 alg_cg2 = ManifoldDiffEq.CG2(S2, ExponentialRetraction())
