@@ -17,7 +17,7 @@ links = InterLinks(
 makedocs(
     # for development, we disable prettyurls
     format = Documenter.HTML(
-        prettyurls = false,
+        prettyurls = (get(ENV, "CI", nothing) == "true"),
         assets = ["assets/favicon.ico", "assets/citations.css"],
     ),
     modules = [ManifoldDiffEq],
