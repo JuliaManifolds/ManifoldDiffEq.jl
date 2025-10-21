@@ -51,10 +51,10 @@ function FrozenManifoldDiffEqOperator{T}(f) where {T <: Number}
     )
 end
 
-function (L::FrozenManifoldDiffEqOperator)(du, u, p, t)
+function (L::FrozenManifoldDiffEqOperator)(du, u, _u, p, t)
     return copyto!(du, L.func(u, p, t))
 end
-function (L::FrozenManifoldDiffEqOperator)(u, p, t)
+function (L::FrozenManifoldDiffEqOperator)(u, _u, p, t)
     return L.func(u, p, t)
 end
 
@@ -72,9 +72,9 @@ function LieManifoldDiffEqOperator{T}(f) where {T <: Number}
     return LieManifoldDiffEqOperator{T, typeof(f)}(f)
 end
 
-function (L::LieManifoldDiffEqOperator)(du, u, p, t)
+function (L::LieManifoldDiffEqOperator)(du, u, _u, p, t)
     return copyto!(du, L.func(u, p, t))
 end
-function (L::LieManifoldDiffEqOperator)(u, p, t)
+function (L::LieManifoldDiffEqOperator)(u, _u, p, t)
     return L.func(u, p, t)
 end
