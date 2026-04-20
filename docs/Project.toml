@@ -19,6 +19,7 @@ ManifoldDiffEq = "0.2"
 Manifolds = "0.11"
 ManifoldsBase = "2"
 Plots = "1"
-
+PythonPlot = "1.0.6"
+StaticArrays = "1.9.18"
 [sources]
 ManifoldDiffEq = { path = ".." }
