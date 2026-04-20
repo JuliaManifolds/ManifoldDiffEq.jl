@@ -1,6 +1,7 @@
 [deps]
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+ManifoldDiffEq = "1143c485-9b25-4e23-a65f-701df382ec90"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
@@ -10,5 +11,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ManifoldDiffEq = {path = ".."}
 
 [compat]
+ManifoldDiffEq = "0.2"
 Test = "1.10"
 julia = "1.10"
