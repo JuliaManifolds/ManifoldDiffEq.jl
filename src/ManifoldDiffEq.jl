@@ -10,6 +10,7 @@ using LieGroups: AbstractLieGroup, GroupAction, base_lie_group, diff_group_apply
 using Manifolds
 using ManifoldsBase: retract_fused, retract_fused!, base_manifold
 
+using Random
 
 using Accessors: @set
 
@@ -256,6 +257,15 @@ function SciMLBase.__init(
         allow_extrapolation = alg_extrapolates(alg),
         initialize_integrator = true,
         initializealg = DefaultInit(),
+        # some new things
+        save_noise = false,
+        delta = nothing,
+        W = nothing,
+        P = nothing,
+        sqdt = nothing,
+        noise = nothing,
+        c = nothing,
+        rate_constants = nothing,
         kwargs...,
     ) where {recompile_flag}
     isdae = false
@@ -442,9 +452,16 @@ function SciMLBase.__init(
     internalnorm = ODE_DEFAULT_NORM
     save_discretes = true
 
+    controller_cache = OrdinaryDiffEqCore.setup_controller_cache(_alg, nothing, controller)
+    _tstops_cache = tstops
+
+    verbose_spec = OrdinaryDiffEqCore._process_verbose_param(verbose)
+
     opts = DEOptions{
         typeof(abstol_internal), typeof(reltol_internal),
-        QT, tType, typeof(controller),
+        QT, tType,
+        # typeof(controller),
+        typeof(controller_cache),
         typeof(internalnorm), typeof(internalopnorm),
         typeof(save_end_user),
         typeof(callbacks_internal),
@@ -453,26 +470,33 @@ function SciMLBase.__init(
         typeof(tstops_internal),
         typeof(d_discontinuities_internal), typeof(userdata),
         typeof(save_idxs),
-        typeof(maxiters), typeof(tstops),
-        typeof(saveat), typeof(d_discontinuities),
+        typeof(maxiters), typeof(_tstops_cache),
+        typeof(saveat), typeof(d_discontinuities), typeof(verbose_spec),
+        typeof(delta),
     }(
         maxiters, save_everystep,
         adaptive, abstol_internal,
         reltol_internal,
-        QT(gamma), QT(qmax),
+        # TODO vvv remove this block as these are controller and not integrator parameters vvv
+        QT(gamma),
+        QT(qmax),
         QT(qmin),
         QT(qsteady_max),
         QT(qsteady_min),
         QT(qoldinit),
+        # TODO ^^^remove this block as these are controller and not integrator parameters ^^^
         QT(failfactor),
         tType(dtmax), tType(dtmin),
-        controller,
+        # TODO vvv remove this vvv
+        # controller,
+        controller_cache,
+        # TODO ^^^ remove this ^^^
         internalnorm,
         internalopnorm,
         save_idxs, tstops_internal,
         saveat_internal,
         d_discontinuities_internal,
-        tstops, saveat,
+        _tstops_cache, saveat,
         d_discontinuities,
         userdata, progress,
         progress_steps,
@@ -480,13 +504,13 @@ function SciMLBase.__init(
         progress_message,
         progress_id,
         timeseries_errors,
-        dense_errors, dense,
+        dense_errors, delta, dense,
         save_on, save_start,
-        save_end, save_discretes, save_end_user,
+        save_end, save_noise, save_discretes, save_end_user,
         callbacks_internal,
         isoutofdomain,
         unstable_check,
-        verbose, calck, force_dtmin,
+        verbose_spec, calck, force_dtmin,
         advance_to_tstop,
         stop_at_next_tstop
     )
@@ -548,77 +572,49 @@ function SciMLBase.__init(
     #fsalfirst, fsallast = get_fsalfirstlast(cache, rate_prototype)
     fsalfirst, fsallast = allocate(rate_prototype), allocate(rate_prototype)
 
+    _rng = Random.default_rng()
+    _dt = dt
+    next_step_tstop = false
+    tstop_target = zero(t)
+    reinitialize = true
+
     integrator = ODEIntegrator{
-        typeof(_alg),
-        isinplace(prob),
-        uType,
-        typeof(du),
-        tType,
-        typeof(p),
-        typeof(eigen_est),
-        typeof(EEst),
-        QT,
-        typeof(tdir),
-        typeof(k),
-        SolType,
-        FType,
-        cacheType,
-        typeof(opts),
-        typeof(fsalfirst),
-        typeof(last_event_error),
-        typeof(callback_cache),
-        typeof(initializealg),
-        typeof(differential_vars),
+        typeof(_alg), isinplace(prob), uType, typeof(du),
+        tType, typeof(p),
+        typeof(eigen_est), EEstT,
+        QT, typeof(tdir), typeof(k), SolType,
+        FType, cacheType,
+        typeof(opts), typeof(fsalfirst),
+        typeof(last_event_error), typeof(callback_cache),
+        typeof(initializealg), typeof(differential_vars),
+        typeof(controller_cache), typeof(_rng),
+        typeof(W), typeof(P), typeof(sqdt),
+        typeof(noise), typeof(c), typeof(rate_constants),
     }(
-        sol,
-        u,
-        du,
-        k,
-        t,
-        tType(dt),
-        f,
-        p,
-        uprev,
-        uprev2,
-        duprev,
-        tprev,
-        _alg,
-        dtcache,
-        dtchangeable,
-        dtpropose,
-        tdir,
-        eigen_est,
-        EEst,
-        QT(qoldinit),
-        q11,
-        erracc,
-        dtacc,
+        sol, u, du, k, t, tType(_dt), f, p,
+        uprev, uprev2, duprev, tprev,
+        _alg, dtcache, dtchangeable,
+        dtpropose, tdir, eigen_est, EEst,
+        # TODO vvv remove these
+        QT(qoldinit), q11,
+        erracc, dtacc,
+        # TODO ^^^ remove these
+        controller_cache,
         success_iter,
-        iter,
-        saveiter,
-        saveiter_dense,
-        cache,
+        iter, saveiter, saveiter_dense, cache,
         callback_cache,
-        kshortsize,
-        force_stepfail,
+        kshortsize, force_stepfail,
         last_stepfail,
-        just_hit_tstop,
-        do_error_check,
+        just_hit_tstop, next_step_tstop, tstop_target, do_error_check,
         event_last_time,
         vector_event_last_time,
-        last_event_error,
-        accept_step,
-        isout,
-        reeval_fsal,
-        u_modified,
-        reinitiailize,
-        isdae,
-        opts,
-        stats,
-        initializealg,
-        differential_vars,
-        fsalfirst,
-        fsallast,
+        last_event_error, accept_step,
+        isout, reeval_fsal,
+        u_modified, reinitialize, isdae,
+        opts, stats, initializealg, differential_vars,
+        fsalfirst, fsallast, _rng,
+        W, P, sqdt,
+        noise, c, rate_constants, QT(1)
     )
 
     if initialize_integrator

@@ -1,6 +1,6 @@
 name = "ManifoldDiffEq"
 uuid = "1143c485-9b25-4e23-a65f-701df382ec90"
-version = "0.2.6"
+version = "0.2.7"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
 
 [deps]
@@ -13,10 +13,14 @@ Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 OrdinaryDiffEqCore = "bbf590c4-e513-4bbe-9b18-05decba2e5d8"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 SciMLOperators = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
 SimpleUnPack = "ce78b400-467f-4804-87d8-8f486da07d0a"
+
+[workspace]
+projects = ["test", "docs"]
 
 [compat]
 Accessors = "0.1"
@@ -28,8 +32,9 @@ LinearAlgebra = "1.6"
 Manifolds = "0.11"
 ManifoldsBase = "2"
 Markdown = "1.6"
-OrdinaryDiffEqCore = "1"
-RecursiveArrayTools = "2, 3"
+OrdinaryDiffEqCore = "3"
+Random = "1.11.0"
+RecursiveArrayTools = "2, 3, 4"
 SciMLBase = "1, 2"
 SciMLOperators = "1"
 SimpleUnPack = "1"
