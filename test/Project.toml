@@ -16,14 +16,14 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ManifoldDiffEq = {path = ".."}
 
 [compat]
-DiffEqBase = "6"
+DiffEqBase = "6, 7.0"
 DoubleFloats = "1.7.1"
 ForwardDiff = "1.3.3"
 LieGroups = "0.1.10"
 ManifoldDiffEq = "0.2"
 Manifolds = "0.11.20"
-OrdinaryDiffEq = "6.111.0"
-RecursiveArrayTools = "3"
+OrdinaryDiffEq = "6.111.0, 7.0"
+RecursiveArrayTools = "3, 4.2"
 ReverseDiff = "1.16.2"
 StaticArrays = "1.9.18"
 Test = "1.10"
