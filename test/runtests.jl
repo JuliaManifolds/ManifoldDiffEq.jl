@@ -4,7 +4,7 @@ using Manifolds, LieGroups
 using LinearAlgebra
 using RecursiveArrayTools
 using DiffEqBase
-using OrdinaryDiffEq
+using OrdinaryDiffEq, OrdinaryDiffEqExplicitRK
 
 function test_solver_frozen(manifold_to_alg; expected_order = nothing, adaptive = false)
     expected_order !== nothing && @testset "alg_order" begin
@@ -179,7 +179,7 @@ function compare_with_diffeq_frozen(manifold_to_alg, tableau)
     prob_frozen = ManifoldODEProblem(A, u0, tspan, M)
     sol_frozen = solve(prob_frozen, alg, dt = dt)
 
-    alg_diffeq = OrdinaryDiffEq.ExplicitRK(tableau)
+    alg_diffeq = OrdinaryDiffEqExplicitRK.ExplicitRK(tableau)
     prob_diffeq = ODEProblem(A, u0, tspan)
     sol_diffeq = solve(prob_diffeq, alg_diffeq; dt = dt, adaptive = false)
 
@@ -202,7 +202,7 @@ function compare_with_diffeq_lie(manifold_to_alg, tableau)
     prob_lie = ManifoldODEProblem(A, u0, tspan, M)
     sol_lie = solve(prob_lie, alg, dt = dt)
 
-    alg_diffeq = OrdinaryDiffEq.ExplicitRK(tableau)
+    alg_diffeq = OrdinaryDiffEqExplicitRK.ExplicitRK(tableau)
     prob_diffeq = ODEProblem(A, u0, tspan)
     sol_diffeq = solve(prob_diffeq, alg_diffeq; dt = dt, adaptive = false)
 

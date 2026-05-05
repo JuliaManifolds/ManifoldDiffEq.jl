@@ -53,6 +53,8 @@ using OrdinaryDiffEqCore:
     qsteady_min_default,
     uses_uprev
 
+using SciMLLogging: SciMLLogging
+
 import OrdinaryDiffEqCore: perform_step!
 
 using OrdinaryDiffEqCore:
@@ -201,48 +203,46 @@ struct DefaultInit end
 
 # Adapted from OrdinaryDiffEq.jl:
 # https://github.com/SciML/OrdinaryDiffEq.jl/blob/1eef9db17600766bb71e7dce0cb105ae5f99b2a5/lib/OrdinaryDiffEqCore/src/solve.jl#L11
-function SciMLBase.__init(
+
+Base.@constprop :aggressive function SciMLBase.__init(
         prob::ManifoldODEProblem,
         alg::AbstractManifoldDiffEqAlgorithm,
         timeseries_init = (),
         ts_init = (),
-        ks_init = (),
-        recompile::Type{Val{recompile_flag}} = Val{true};
+        ks_init = ();
         saveat = (),
         tstops = (),
         d_discontinuities = (),
+        save_idxs = nothing,
         save_everystep = isempty(saveat),
         save_on = true,
-        save_start = save_everystep ||
-            isempty(saveat) ||
-            saveat isa Number ||
-            prob.tspan[1] in saveat,
+        save_discretes = true,
+        save_start = save_everystep || isempty(saveat) ||
+            saveat isa Number || prob.tspan[1] in saveat,
         save_end = nothing,
         callback = nothing,
-        dense::Bool = save_everystep && isempty(saveat),
+        dense = save_everystep && isempty(saveat) &&
+            !OrdinaryDiffEqCore.default_linear_interpolation(prob, alg),
         calck = (callback !== nothing && callback !== CallbackSet()) ||
-            (dense) ||
-            !isempty(saveat), # and no dense output
-        dt = eltype(prob.tspan)(0),
-        dtmin = eltype(prob.tspan)(0),
-        dtmax = eltype(prob.tspan)((prob.tspan[end] - prob.tspan[1])),
+            (dense) || !isempty(saveat), # and no dense output
+        dt = nothing,
+        # For runtime-unit quantities (DynamicQuantities), eltype(prob.tspan)(0) would
+        # drop units; use a value-based zero to preserve units.
+        dtmin = zero(prob.tspan[1]),
+        dtmax = (prob.tspan[end] - prob.tspan[1]),
         force_dtmin = false,
-        adaptive = isadaptive(alg),
-        gamma = gamma_default(alg),
-        abstol::Union{Nothing, Real} = nothing,
-        reltol::Union{Nothing, Real} = nothing,
-        qmin = qmin_default(alg),
-        qmax = qmax_default(alg),
-        qsteady_min = qsteady_min_default(alg),
-        qsteady_max = qsteady_max_default(alg),
-        qoldinit = isadaptive(alg) ? 1 // 10^4 : 0,
+        adaptive = OrdinaryDiffEqCore.anyadaptive(alg),
+        abstol = nothing,
+        reltol = nothing,
         controller = nothing,
+        fullnormalize = true,
         failfactor = 2,
-        maxiters::Int = isadaptive(alg) ? 1000000 : typemax(Int),
+        maxiters = OrdinaryDiffEqCore.anyadaptive(alg) ? 1000000 : typemax(Int),
+        internalnorm = ODE_DEFAULT_NORM,
         internalopnorm = opnorm,
         isoutofdomain = ODE_DEFAULT_ISOUTOFDOMAIN,
         unstable_check = ODE_DEFAULT_UNSTABLE_CHECK,
-        verbose = true,
+        verbose = SciMLLogging.Standard(),
         timeseries_errors = true,
         dense_errors = false,
         advance_to_tstop = false,
@@ -256,8 +256,12 @@ function SciMLBase.__init(
         userdata = nothing,
         allow_extrapolation = alg_extrapolates(alg),
         initialize_integrator = true,
+        alias = OrdinaryDiffEqCore.ODEAliasSpecifier(),
         initializealg = DefaultInit(),
+        rng = nothing,
         # some new things
+        # SDE/RODE fields: accepted here so that SDE packages can delegate to
+        # _ode_init and construct an ODEIntegrator with noise populated.
         save_noise = false,
         delta = nothing,
         W = nothing,
@@ -266,8 +270,14 @@ function SciMLBase.__init(
         noise = nothing,
         c = nothing,
         rate_constants = nothing,
-        kwargs...,
-    ) where {recompile_flag}
+        # Pre-built cache for SDE delegation (skip alg_cache call)
+        _cache = nothing,
+        # Pre-built u/uprev for SDE delegation (cache holds references to these)
+        _u = nothing,
+        _uprev = nothing,
+        seed = UInt64(0),
+        kwargs...
+    )
     isdae = false
 
     if !isempty(saveat) && dense
@@ -418,6 +428,12 @@ function SciMLBase.__init(
     else
         uprev2 = uprev
     end
+    _dt = if isnothing(dt)
+        OrdinaryDiffEqCore.isdiscretealg(alg) && isempty(tstops) ?
+            eltype(prob.tspan)(1) : eltype(prob.tspan)(0)
+    else
+        dt
+    end
 
     cache = alg_cache(
         _alg,
@@ -439,7 +455,7 @@ function SciMLBase.__init(
 
     # Setting up the step size controller
     if controller === nothing
-        controller = default_controller(_alg, cache, qoldinit, nothing, nothing)
+        controller = default_controller(QT, alg)
     end
 
     save_end_user = save_end
@@ -460,8 +476,6 @@ function SciMLBase.__init(
     opts = DEOptions{
         typeof(abstol_internal), typeof(reltol_internal),
         QT, tType,
-        # typeof(controller),
-        typeof(controller_cache),
         typeof(internalnorm), typeof(internalopnorm),
         typeof(save_end_user),
         typeof(callbacks_internal),
@@ -477,20 +491,8 @@ function SciMLBase.__init(
         maxiters, save_everystep,
         adaptive, abstol_internal,
         reltol_internal,
-        # TODO vvv remove this block as these are controller and not integrator parameters vvv
-        QT(gamma),
-        QT(qmax),
-        QT(qmin),
-        QT(qsteady_max),
-        QT(qsteady_min),
-        QT(qoldinit),
-        # TODO ^^^remove this block as these are controller and not integrator parameters ^^^
         QT(failfactor),
         tType(dtmax), tType(dtmin),
-        # TODO vvv remove this vvv
-        # controller,
-        controller_cache,
-        # TODO ^^^ remove this ^^^
         internalnorm,
         internalopnorm,
         save_idxs, tstops_internal,
@@ -531,26 +533,21 @@ function SciMLBase.__init(
         stats = stats,
     )
 
-    if recompile_flag == true
-        FType = typeof(f)
-        SolType = typeof(sol)
-        cacheType = typeof(cache)
-    else
-        FType = Function
-        SolType = DiffEqBase.AbstractDAESolution
-        cacheType = DAECache
-    end
+    FType = typeof(f)
+    SolType = typeof(sol)
+    cacheType = typeof(cache)
 
     # rate/state = (state/time)/state = 1/t units, internalnorm drops units
     # we don't want to differentiate through eigenvalue estimation
     eigen_est = inv(one(tType))
     tprev = t
-    dtcache = tType(dt)
-    dtpropose = tType(dt)
+    dtcache = tType(_dt)
+    dtpropose = tType(_dt)
     iter = 0
     kshortsize = 0
     reeval_fsal = false
     u_modified = false
+    derivative_discontinuity = false
     EEst = EEstT(1)
     just_hit_tstop = false
     isout = false
@@ -573,16 +570,14 @@ function SciMLBase.__init(
     fsalfirst, fsallast = allocate(rate_prototype), allocate(rate_prototype)
 
     _rng = Random.default_rng()
-    _dt = dt
     next_step_tstop = false
     tstop_target = zero(t)
     reinitialize = true
 
     integrator = ODEIntegrator{
         typeof(_alg), isinplace(prob), uType, typeof(du),
-        tType, typeof(p),
-        typeof(eigen_est), EEstT,
-        QT, typeof(tdir), typeof(k), SolType,
+        tType, typeof(p), typeof(eigen_est),
+        typeof(tdir), typeof(k), SolType,
         FType, cacheType,
         typeof(opts), typeof(fsalfirst),
         typeof(last_event_error), typeof(callback_cache),
@@ -594,11 +589,7 @@ function SciMLBase.__init(
         sol, u, du, k, t, tType(_dt), f, p,
         uprev, uprev2, duprev, tprev,
         _alg, dtcache, dtchangeable,
-        dtpropose, tdir, eigen_est, EEst,
-        # TODO vvv remove these
-        QT(qoldinit), q11,
-        erracc, dtacc,
-        # TODO ^^^ remove these
+        dtpropose, tdir, eigen_est,
         controller_cache,
         success_iter,
         iter, saveiter, saveiter_dense, cache,
@@ -610,11 +601,11 @@ function SciMLBase.__init(
         vector_event_last_time,
         last_event_error, accept_step,
         isout, reeval_fsal,
-        u_modified, reinitialize, isdae,
+        derivative_discontinuity, reinitialize, isdae,
         opts, stats, initializealg, differential_vars,
         fsalfirst, fsallast, _rng,
         W, P, sqdt,
-        noise, c, rate_constants, QT(1)
+        noise, c, rate_constants
     )
 
     if initialize_integrator
