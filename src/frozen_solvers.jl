@@ -206,7 +206,7 @@ function perform_step!(integrator, cache::CG2_3Cache, repeat_step = false)
         X3tu = f.f.operator_vector_transport(M, cache.X3u, cache.X3, uhat, p, t + c3h, t)
         retract_fused!(M, uhat, uhat, X3tu, b3hat, alg.retraction_method)
 
-        integrator.EEst = calculate_eest(
+        eest = calculate_eest(
             M,
             uhat,
             uprev,
@@ -216,6 +216,7 @@ function perform_step!(integrator, cache::CG2_3Cache, repeat_step = false)
             integrator.opts.internalnorm,
             t,
         )
+        OrdinaryDiffEqCore.set_EEst!(integrator, eest)
     end
 
     return integrator.stats.nf += 3
