@@ -1,6 +1,6 @@
 name = "ManifoldDiffEq"
 uuid = "1143c485-9b25-4e23-a65f-701df382ec90"
-version = "0.2.8"
+version = "0.2.9"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
 
 [workspace]
